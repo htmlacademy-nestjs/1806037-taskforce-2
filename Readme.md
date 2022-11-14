@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Евгений Архипкин](https://up.htmlacademy.ru/nodejs-2/2/user/1806037).
-* Наставник: `Неизвестно`.
+* Наставник: [Даниил Васильев](https://htmlacademy.ru/profile/id2080687).
 
 ---
 

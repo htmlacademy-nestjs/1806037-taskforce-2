@@ -4,10 +4,10 @@ export interface UserInterface {
   _id: string;
   email: string;
   passwordHash: string;
+  role: keyof typeof UserRole;
   firstname: string;
   lastname: string;
   city: string;
-  role: keyof typeof UserRole;
-  avatar?: string;
   dateBith: Date;
+  avatar?: string;
 }

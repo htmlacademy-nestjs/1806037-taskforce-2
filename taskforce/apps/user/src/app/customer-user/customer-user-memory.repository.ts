@@ -3,7 +3,7 @@ import { UserInterface } from '@taskforce/shared-types';
 import { CustomerUserEntity } from './customer-user.entity';
 import * as crypto from 'crypto';
 
-export class CustomerUserMemoryRepository implements CRUDRepositoryInterface<CustomerUserEntity, string, UserInterface> {
+export class UserMemoryRepository implements CRUDRepositoryInterface<CustomerUserEntity, string, UserInterface> {
   private repository: {[key: string]: UserInterface} = {};
 
   public async create(item: CustomerUserEntity): Promise<UserInterface> {

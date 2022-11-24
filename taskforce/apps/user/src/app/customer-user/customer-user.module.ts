@@ -1,4 +1,9 @@
 import { Module } from '@nestjs/common';
+import { CustomerUserMemoryRepository } from './customer-user-memory.repository';
 
-@Module({})
+@Module({
+  imports: [],
+  providers: [CustomerUserMemoryRepository],
+  exports: [CustomerUserMemoryRepository],
+})
 export class CustomerUserModule {}

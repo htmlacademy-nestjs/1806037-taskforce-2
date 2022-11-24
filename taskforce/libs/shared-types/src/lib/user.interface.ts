@@ -8,6 +8,6 @@ export interface UserInterface {
   firstname: string;
   lastname: string;
   city: string;
-  dateBith: Date;
+  dateBirth: Date;
   avatar?: string;
 }

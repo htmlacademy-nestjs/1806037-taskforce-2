@@ -1,6 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { fillDTO } from '@taskforce/core';
+import { UserRoleEnum } from '@taskforce/shared-types';
 import { validate } from 'class-validator';
+import { CustomerUserDto } from './dto/customer-user.dto';
+import { PerformerUserDto } from './dto/performer-user.dro';
 import { UpdatePasswordUserDto } from './dto/update-password-user.dto';
 import { UserService } from './user.service';
 
@@ -13,7 +16,18 @@ export class UserController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getUserById(@Param('id') id: string) {
-    return await this.userService.findUserById(id);
+    const existUser = await this.userService.findUserById(id);
+
+    if (typeof existUser === 'string') {
+      return existUser;
+    }
+
+    if (existUser.role === UserRoleEnum.Customer) {
+      return fillDTO(CustomerUserDto, existUser);
+    }
+    if (existUser.role === UserRoleEnum.Performer) {
+      return fillDTO(PerformerUserDto, existUser);
+    }
   }
 
   @Post(':id/updatepassword')

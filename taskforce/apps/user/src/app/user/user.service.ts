@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { comparePassword, fillDTO, getHashPassword } from '@taskforce/core';
+import { comparePassword, getHashPassword } from '@taskforce/core';
 import { UserRoleEnum } from '@taskforce/shared-types';
-import { UpdateUserDtoType } from '../../assets/types/types';
+import { RegistrationUserEntityType, UpdateUserDtoType } from '../../assets/types/types';
+import { AuthUserDto } from '../auth/dto/auth-user.dto';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { CustomerUserEntity } from '../user-memory/entities/customer-user.entity';
+import { PerformerUserEntity } from '../user-memory/entities/performer-user.entity';
 import { UserMemoryRepository } from '../user-memory/user-memory.repository';
-import { CustomerUserDto } from './dto/customer-user.dto';
-import { PerformerUserDto } from './dto/performer-user.dro';
 import { UpdatePasswordUserDto } from './dto/update-password-user.dto';
 
 @Injectable()
@@ -13,6 +15,52 @@ export class UserService {
     private readonly userRepository: UserMemoryRepository
   ) { }
 
+  public async register(dto: CreateUserDto) {
+    const {email, password, role} = dto;
+
+    const existUser = await this.userRepository
+            .findByEmail(email);
+
+    if (existUser) {
+      return 'User already exists';
+    }
+
+    let registrationUserEntity: RegistrationUserEntityType;
+
+    if (role === UserRoleEnum.Customer) {
+      registrationUserEntity = await new CustomerUserEntity(dto)
+      .setPassword(password);
+    }
+    if (role === UserRoleEnum.Performer) {
+      registrationUserEntity = await new PerformerUserEntity(dto)
+      .setPassword(password);
+    }
+
+    return await this.userRepository.create(registrationUserEntity);
+  }
+
+  public async verifyUser(user: AuthUserDto) {
+    const {email, password} = user;
+
+    const existUser = await this.userRepository.findByEmail(email);
+
+    if (!existUser) {
+      return `The user with this email: ${email} was not found`;
+    }
+
+    const isCheckPassword = comparePassword(password, existUser.passwordHash);
+
+    if (!isCheckPassword) {
+      return `Invalid password`;
+    }
+
+    return existUser;
+  }
+
+  public async logout() {
+    return 'NO_INPLEMENTS';
+  }
+
   public async findUserById(id: string) {
     const existUser = await this.userRepository.findById(id);
 
@@ -20,12 +68,7 @@ export class UserService {
       return `The user with this id: ${id} was not found`;
     }
 
-    if (existUser.role === UserRoleEnum.Customer) {
-      return fillDTO(CustomerUserDto, existUser);
-    }
-    if (existUser.role === UserRoleEnum.Performer) {
-      return fillDTO(PerformerUserDto, existUser);
-    }
+    return existUser;
   }
 
   public async updateUserById(id: string, dto: UpdateUserDtoType) {

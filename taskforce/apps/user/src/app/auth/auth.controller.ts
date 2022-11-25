@@ -3,7 +3,7 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { fillDTO } from '@taskforce/core';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { AuthService } from './auth.service';
+import { UserService } from '../user/user.service';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
@@ -13,7 +13,7 @@ import { UserDto } from './dto/user.dto';
 export class AuthController {
 
   constructor (
-    private  readonly authService: AuthService
+    private  readonly UserService: UserService
   ) { }
 
   @Post('register')
@@ -29,7 +29,7 @@ export class AuthController {
       return errors;
     }
 
-    return fillDTO(UserDto, await this.authService.register(dto));
+    return fillDTO(UserDto, await this.UserService.register(dto));
   }
 
   @Post('login')
@@ -46,7 +46,7 @@ export class AuthController {
       return errors;
     }
 
-    return fillDTO(UserDto, await this.authService.verifyUser(user));
+    return fillDTO(UserDto, await this.UserService.verifyUser(user));
   }
 
   @Post('logout')
@@ -56,6 +56,6 @@ export class AuthController {
     description: 'The user logged out'
   })
   async logout() {
-    return await this.authService.logout();
+    return await this.UserService.logout();
   }
 }

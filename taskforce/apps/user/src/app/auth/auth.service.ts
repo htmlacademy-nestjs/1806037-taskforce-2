@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { compare } from 'bcrypt';
-import { UserInterface } from '@taskforce/shared-types';
+import { UserRoleEnum } from '@taskforce/shared-types';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserMemoryRepository } from '../customer-user/customer-user-memory.repository';
-import { CustomerUserEntity } from '../customer-user/customer-user.entity';
-import { LoginUserDto } from './dto/login-user.dto';
+import { UserMemoryRepository } from '../user-memory/user-memory.repository';
+import { CustomerUserEntity } from '../user-memory/entities/customer-user.entity';
+import { AuthUserDto } from './dto/auth-user.dto';
+import { RegistrationUserEntityType } from '../../assets/types/types';
+import { PerformerUserEntity } from '../user-memory/entities/performer-user.entity';
 
 
 @Injectable()
@@ -14,22 +16,30 @@ export class AuthService {
   ) { }
 
   public async register(dto: CreateUserDto) {
-    const {email, password} = dto;
+    const {email, password, role} = dto;
 
     const existUser = await this.userRepository
             .findByEmail(email);
 
     if (existUser) {
-      throw new Error('User already exists');
+      return 'User already exists';
     }
 
-    const customerUserEntity = await new CustomerUserEntity(dto)
-            .setPassword(password);
+    let registrationUserEntity: RegistrationUserEntityType;
 
-    return await this.userRepository.create(customerUserEntity);
+    if (role === UserRoleEnum.Customer) {
+      registrationUserEntity = await new CustomerUserEntity(dto)
+      .setPassword(password);
+    }
+    if (role === UserRoleEnum.Performer) {
+      registrationUserEntity = await new PerformerUserEntity(dto)
+      .setPassword(password);
+    }
+
+    return await this.userRepository.create(registrationUserEntity);
   }
 
-  public async verifyUser(user: LoginUserDto) {
+  public async verifyUser(user: AuthUserDto) {
     const {email, password} = user;
 
     const existUser = await this.userRepository.findByEmail(email);
@@ -43,5 +53,11 @@ export class AuthService {
     if (!isCheckPassword) {
       return `Invalid password`;
     }
+
+    return existUser;
+  }
+
+  public async logout() {
+    return 'NO_INPLEMENTS';
   }
 }

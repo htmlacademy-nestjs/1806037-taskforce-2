@@ -1,10 +1,11 @@
 import * as dayjs from 'dayjs';
+import { hash, compare } from 'bcrypt';
 
 import { UserInterface } from '@taskforce/shared-types';
-import { genSalt, hash, compare } from 'bcrypt';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { CreateUserDto } from '../../auth/dto/create-user.dto';
 
-const SALT_ROUNDS = 10;
+// import { SALT_ROUNDS } from '../../../assets/constants';
+import { comparePassword, getHashPassword, SALT } from '@taskforce/core';
 
 export class CustomerUserEntity implements UserInterface {
   public _id: string;
@@ -25,6 +26,15 @@ export class CustomerUserEntity implements UserInterface {
 
   public avatar?: string;
 
+  public description: string;
+
+  public tasks: object[];
+
+  public createdAt: Date;
+
+  public updatedAt: Date | null;
+
+
   constructor(customerUser: CreateUserDto) {
     this.fillEntity(customerUser);
   }
@@ -34,14 +44,14 @@ export class CustomerUserEntity implements UserInterface {
   }
 
   public async setPassword(password: string): Promise<CustomerUserEntity> {
-    const salt = await genSalt(SALT_ROUNDS);
-    this.passwordHash = (await hash(password, salt));
+    // const salt = await genSalt(SALT_ROUNDS);
+    this.passwordHash = getHashPassword(password);
 
     return this;
   }
 
   public async comparePassword(password: string): Promise<boolean> {
-    return await compare(password, this.passwordHash);
+    return comparePassword(password, this.passwordHash);
   }
 
   public fillEntity(customerUser: CreateUserDto) {
@@ -54,5 +64,7 @@ export class CustomerUserEntity implements UserInterface {
     this.dateBirth = dayjs(customerUser.dateBirth).toDate();
     this.city = customerUser.city;
     this.avatar = customerUser?.avatar;
+    this.description = '';
+    this.tasks = [];
   }
 }

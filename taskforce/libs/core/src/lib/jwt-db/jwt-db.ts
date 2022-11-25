@@ -37,6 +37,6 @@ export class JWT {
           .setProtectedHeader({ alg: algoritm })
           .setIssuedAt()
           .setExpirationTime(expirationTime)
-          .sign(crypto.createSecretKey(secret, 'utf-8'));
+          .sign(crypto.createSecretKey(jwtSecret, 'utf-8'));
   }
 }

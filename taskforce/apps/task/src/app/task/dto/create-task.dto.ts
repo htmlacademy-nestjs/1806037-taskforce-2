@@ -1,4 +1,8 @@
+import {  } from 'class-transformer';
+import {  } from 'class-validator';
+
 export class CreateTaskDto {
+  @ApiRo
   title: string;
 
   description: string;

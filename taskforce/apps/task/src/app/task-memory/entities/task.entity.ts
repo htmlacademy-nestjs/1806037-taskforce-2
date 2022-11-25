@@ -17,8 +17,12 @@ export class TaskEntity implements TaskInterface {
 
   tags?: string[];
 
-  constructor () {
-
+  constructor (dto: CreateTaskDto) {
+    this.fillEntity(dto);
   }
+
+  private async fillEntity(dto: CreateTaskDto) {
+    this.
+  };
 
 }

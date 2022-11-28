@@ -1,15 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { CurrentDateValidator } from '@taskforce/core';
-import { Expose } from 'class-transformer';
-import { IsArray, IsDefined, IsNotEmpty, IsString, MaxLength, Min, MinLength, Validate } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { CurrentDateValidator } from "@taskforce/core";
+import { Expose } from "class-transformer";
+import { IsArray, IsString, MaxLength, Min, MinLength, Validate } from "class-validator";
 
-export class CreateTaskDto {
+export class UpdateTaskDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  @IsNotEmpty()
-  @IsDefined()
-  public author!: string;
+  public author: string;
 
   @ApiProperty()
   @Expose()
@@ -20,8 +18,7 @@ export class CreateTaskDto {
   @MaxLength(100, {
     message: 'The «title» field must be no more than 100 characters',
   })
-  @IsDefined()
-  title!: string;
+  title: string;
 
   @ApiProperty()
   @Expose()
@@ -32,14 +29,11 @@ export class CreateTaskDto {
   @MaxLength(1024, {
     message: 'The «description» field must be no more than 1024 characters',
   })
-  @IsDefined()
-  description!: string;
+  description: string;
 
   @ApiProperty()
   @Expose()
-  @IsNotEmpty()
-  @IsDefined()
-  category!: string;
+  category: string;
 
   @ApiProperty()
   @Expose()

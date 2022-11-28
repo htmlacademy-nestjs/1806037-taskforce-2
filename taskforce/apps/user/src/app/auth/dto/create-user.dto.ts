@@ -1,8 +1,8 @@
 import { UserRoleEnum } from "@taskforce/shared-types";
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength, Validate } from 'class-validator';
-import { CustomDateValidator } from "@taskforce/core";
+import { IsDefined, IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength, Validate } from 'class-validator';
+import { AdultDateValidator } from "@taskforce/core";
 
 export class CreateUserDto {
   @ApiProperty({
@@ -12,6 +12,7 @@ export class CreateUserDto {
   })
   @IsEmail()
   @IsNotEmpty()
+  @IsDefined()
   public email: string;
 
   @ApiProperty({
@@ -24,6 +25,7 @@ export class CreateUserDto {
   @MaxLength(12, {
     message: 'Password is longer than 12 characters'
   })
+  @IsDefined()
   public password: string;
 
   @ApiProperty({
@@ -33,6 +35,7 @@ export class CreateUserDto {
   @IsEnum(UserRoleEnum, {
     message: `'Customer' or 'Performer'`
   })
+  @IsDefined()
   public role: keyof typeof UserRoleEnum;
 
   @ApiProperty({
@@ -45,6 +48,7 @@ export class CreateUserDto {
   @MaxLength(50, {
     message: 'Password is longer than 50 characters'
   })
+  @IsDefined()
   public firstname: string;
 
   @ApiProperty({
@@ -57,14 +61,16 @@ export class CreateUserDto {
   @MaxLength(50, {
     message: 'Password is longer than 50 characters'
   })
+  @IsDefined()
   public lastname: string;
 
   @ApiProperty({
     required: true,
   })
-  @Validate(CustomDateValidator, {
+  @Validate(AdultDateValidator, {
     message: 'The user is under 18 years of age'
   })
+  @IsDefined()
   public dateBirth: string;
 
   @ApiProperty({
@@ -72,6 +78,7 @@ export class CreateUserDto {
   })
   @IsString()
   // @IsEnum() ---- ТУТ НУЖЕН СПИСОК ГОРОДОВ
+  @IsDefined()
   public city: string;
 
   @ApiProperty()

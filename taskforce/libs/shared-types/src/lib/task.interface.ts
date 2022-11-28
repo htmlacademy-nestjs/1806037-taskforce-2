@@ -14,6 +14,4 @@ export interface TaskInterface {
   address?: string;
 
   tags?: string[];
-
-
 }

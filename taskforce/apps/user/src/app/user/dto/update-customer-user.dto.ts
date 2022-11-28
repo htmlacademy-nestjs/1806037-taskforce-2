@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { CustomDateValidator } from "@taskforce/core";
+import { AdultDateValidator } from "@taskforce/core";
 import { Expose } from "class-transformer";
 import { IsString, MaxLength, MinLength, Validate } from 'class-validator';
 
@@ -17,7 +17,7 @@ export class UpdateCustomerUserDto {
 
   @ApiProperty()
   @Expose()
-  @Validate(CustomDateValidator, {
+  @Validate(AdultDateValidator, {
     message: 'The user is under 18 years of age'
   })
   public dateBirth: string;

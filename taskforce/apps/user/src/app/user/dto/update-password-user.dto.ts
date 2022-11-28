@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose } from "class-transformer";
-import { IsString, MaxLength, MinLength } from "class-validator";
+import { IsDefined, IsString, MaxLength, MinLength } from "class-validator";
 
 export class UpdatePasswordUserDto {
   @ApiProperty()
   @Expose({name: 'old_password'})
   @IsString()
+  @IsDefined()
   public oldPassword: string;
 
   @ApiProperty()
@@ -17,5 +18,6 @@ export class UpdatePasswordUserDto {
   @MaxLength(12, {
     message: 'Password is longer than 12 characters'
   })
+  @IsDefined()
   public newPassword: string;
 }

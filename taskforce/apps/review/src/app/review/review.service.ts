@@ -16,4 +16,14 @@ export class ReviewService {
     return this.reviewRepository.create(reviewEntity);
   }
 
+  public async deleteReview(commentId: string): Promise<void | null> {
+    const existComment = await this.reviewRepository.findById(commentId);
+
+    if (!existComment) {
+      return null;
+    }
+
+    return await this.reviewRepository.delete(commentId);
+  }
+
 }

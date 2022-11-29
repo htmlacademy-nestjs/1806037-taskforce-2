@@ -10,7 +10,7 @@ import { ReviewEntity } from './entities/review.entity';
 export class ReviewMemoryRepository implements CRUDRepositoryInterface<ReviewEntity, string, ReviewDto> {
   private reviewRepository: object = {};
 
-  create(item: ReviewEntity): Promise<ReviewDto> {
+  public async create(item: ReviewEntity): Promise<ReviewDto> {
     const id = crypto.randomUUID();
 
     this.reviewRepository[id] = { _id: id, ...item.isObject(), rating: crypto.randomInt(1, 5), createdAt: dayjs().toDate() };
@@ -18,16 +18,16 @@ export class ReviewMemoryRepository implements CRUDRepositoryInterface<ReviewEnt
     return this.reviewRepository[id];
   }
 
-  findById(id: string): Promise<ReviewDto> {
+  public async findById(id: string): Promise<ReviewDto> {
     return this.reviewRepository[id];
   }
 
-  update(id: string, item: ReviewEntity): Promise<ReviewDto> {
+  public async update(id: string, item: ReviewEntity): Promise<ReviewDto> {
     throw new Error("Method not implemented.");
   }
 
-  delete(id: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async delete(id: string): Promise<void> {
+    delete this.reviewRepository[id];
   }
 
 }

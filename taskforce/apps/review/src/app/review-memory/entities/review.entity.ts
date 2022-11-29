@@ -25,7 +25,7 @@ export class ReviewEntity implements ReviewInterface {
 
     this.review = review;
     this.taskId = taskId;
-    this.score = Number(score);
+    this.score = score;
     this.userId = userId;
   }
 

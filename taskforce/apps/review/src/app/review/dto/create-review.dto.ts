@@ -1,14 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CustomNumberValidator } from '@taskforce/core';
-import { Expose } from 'class-transformer';
-import { IsString, IsDefined, MinLength, MaxLength, IsNumberString, Min, Max, IsInt, Validate } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { IsString, IsDefined, MinLength, MaxLength, Min, Max, IsInt } from 'class-validator';
 
 export class CreateReviewDto {
   @ApiProperty({
     required: true,
     description: 'Review text',
   })
-  // @Expose()
+  @Expose()
   @IsString()
   @MinLength(50, {
     message: 'Review text is shorter than 50 characters'
@@ -19,31 +18,35 @@ export class CreateReviewDto {
   @IsDefined()
   public review: string;
 
+
   @ApiProperty({
     required: true,
     description: 'Task ID for current review',
   })
-  // @Expose()
+  @Expose()
   @IsString()
   @IsDefined()
   public taskId: string;
+
 
   @ApiProperty({
     required: true,
     description: 'Creator ID review',
   })
-  // @Expose()
+  @Expose()
   @IsString()
   @IsDefined()
   public userId: string;
+
 
   @ApiProperty({
     required: true,
     description: 'Score for current review',
   })
-  @Validate(CustomNumberValidator, {
-    message: 'Current value must be an integer, not less than 1 and not more than 5'
-  })
-  @IsDefined()
+  @Expose()
+  @Type(() => Number)
+  @Min(1)
+  @Max(5)
+  @IsInt()
   public score: number;
 }

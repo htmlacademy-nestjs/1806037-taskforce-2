@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { fillDTO } from '@taskforce/core';
 import { plainToInstance } from 'class-transformer';
@@ -17,9 +17,11 @@ export class TaskController {
   ) { }
 
   @ApiResponse({
-    description: 'Create new task'
+    status: HttpStatus.CREATED,
+    description: 'Create new task',
   })
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   public async createTask(@Body() dto: CreateTaskDto): Promise<TaskDto | ValidationError[]> {
     const newTask = plainToInstance(CreateTaskDto, dto);
     const errors = await validate(newTask, { skipMissingProperties: true });
@@ -36,9 +38,11 @@ export class TaskController {
   }
 
   @ApiResponse({
-    description: 'Get tasks list'
+    status: HttpStatus.OK,
+    description: 'Get tasks list',
   })
   @Get()
+  @HttpCode(HttpStatus.OK)
   public async getTasks(@Query('page') page: number): Promise<TaskDto | TaskDto[]> {
     const paginationCount = Number(Number(page).toFixed(0));
 
@@ -50,9 +54,11 @@ export class TaskController {
   }
 
   @ApiResponse({
-    description: 'Get task by id'
+    status: HttpStatus.OK,
+    description: 'Get task by id',
   })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   public async getTask(@Param('id') taskId: string): Promise<TaskDto | string> {
     const existTask = await this.taskService.getTaskById(taskId);
 
@@ -64,9 +70,11 @@ export class TaskController {
   }
 
   @ApiResponse({
-    description: 'Update task by id'
+    status: HttpStatus.CREATED,
+    description: 'Update task by id',
   })
   @Put(':id')
+  @HttpCode(HttpStatus.CREATED)
   public async updateTask(@Param('id') taskId: string, @Body() dto: UpdateTaskDto): Promise<TaskDto | ValidationError[] | string> {
     const updateTask = plainToInstance(UpdateTaskDto, dto, { exposeUnsetFields: false });
     const errors = await validate(updateTask, { skipMissingProperties: true });
@@ -85,9 +93,11 @@ export class TaskController {
   }
 
   @ApiResponse({
-    description: 'Update status task by id'
+    status: HttpStatus.CREATED,
+    description: 'Update status task by id',
   })
   @Put(':id/updatestatus')
+  @HttpCode(HttpStatus.CREATED)
   public async updateStatusTask(@Param('id') taskId: string, @Body() dto: StatusTaskDto): Promise<TaskDto | string | ValidationError[]> {
     const targetDto = plainToInstance(StatusTaskDto, dto);
     const errors = await validate(targetDto);
@@ -108,13 +118,11 @@ export class TaskController {
   }
 
   @ApiResponse({
-    description: 'Delete task by id'
-  })
-
-  @ApiResponse({
-    description: 'Add reply to task by id'
+    status: HttpStatus.CREATED,
+    description: 'Add reply to task by id',
   })
   @Put(':id/addreply')
+  @HttpCode(HttpStatus.CREATED)
   public async addReplyToTask(@Param('id') taskId: string, @Body() dto: any): Promise<TaskDto | string> {
     // ВАЛИДАЦИЯ ИД НУЖНА БУДЕТ !!! performerInfo
 
@@ -127,7 +135,12 @@ export class TaskController {
     return fillDTO(TaskDto, result);
   }
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Delete task by id',
+  })
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   public async deleteTask(@Param('id') taskId: string): Promise<string> {
     const result = await this.taskService.deleteTaskById(taskId);
 

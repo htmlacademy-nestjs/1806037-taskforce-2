@@ -1,0 +1,3 @@
+export const DEFAULT_COMMENT_COUNT = 50;
+
+export const DEFAULT_PAGINATION_COUNT = 1;

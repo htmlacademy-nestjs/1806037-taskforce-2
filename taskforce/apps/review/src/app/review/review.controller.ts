@@ -21,14 +21,13 @@ export class ReviewController {
   @HttpCode(HttpStatus.CREATED)
   public async create(@Body() dto: CreateReviewDto): Promise<ReviewDto | ValidationError[]> {
     const newReview = plainToInstance(CreateReviewDto, dto, { excludeExtraneousValues: true, enableImplicitConversion: true });
-    console.log(newReview);
     const errors = await validate(newReview);
 
     if (errors.length > 0) {
       return errors;
     }
 
-    return fillDTO(ReviewDto, await this.reviewService.createReview(newReview));
+    return fillDTO(ReviewDto, await this.reviewService.create(newReview));
   }
 
   @ApiResponse({
@@ -38,7 +37,7 @@ export class ReviewController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   public async delete(@Param('id') commentId: string): Promise<string> {
-    const result = await this.reviewService.deleteReview(commentId);
+    const result = await this.reviewService.delete(commentId);
 
     if (result === null) {
       return `Comment with id: ${commentId} was not found`;

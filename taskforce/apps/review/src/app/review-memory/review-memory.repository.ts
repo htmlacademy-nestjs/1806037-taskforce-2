@@ -7,10 +7,10 @@ import { ReviewDto } from "../review/dto/review.dto";
 import { ReviewEntity } from './entities/review.entity';
 
 @Injectable()
-export class ReviewMemoryRepository implements CRUDRepositoryInterface<ReviewEntity, string, ReviewDto> {
+export class ReviewMemoryRepository implements CRUDRepositoryInterface<ReviewEntity, string, ReviewEntity> {
   private reviewRepository: object = {};
 
-  public async create(item: ReviewEntity): Promise<ReviewDto> {
+  public async create(item: ReviewEntity): Promise<ReviewEntity> {
     const id = crypto.randomUUID();
 
     this.reviewRepository[id] = { _id: id, ...item.isObject(), rating: crypto.randomInt(1, 5), createdAt: dayjs().toDate() };
@@ -18,11 +18,11 @@ export class ReviewMemoryRepository implements CRUDRepositoryInterface<ReviewEnt
     return this.reviewRepository[id];
   }
 
-  public async findById(id: string): Promise<ReviewDto> {
+  public async findById(id: string): Promise<ReviewEntity> {
     return this.reviewRepository[id];
   }
 
-  public async update(id: string, item: ReviewEntity): Promise<ReviewDto> {
+  public async update(id: string, item: ReviewEntity): Promise<ReviewEntity> {
     throw new Error("Method not implemented.");
   }
 

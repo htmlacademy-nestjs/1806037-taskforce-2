@@ -3,7 +3,6 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { fillDTO } from '@taskforce/core';
 import { plainToInstance } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
-import { DEFAULT_PAGINATION_COUNT } from '../../assets/constants';
 import { CommentService } from './comment.service';
 import { CommentDto } from './dto/comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -29,7 +28,7 @@ export class CommentController {
       return errors;
     }
 
-    return fillDTO(CommentDto, await this.commentService.createComment(dto));
+    return fillDTO(CommentDto, await this.commentService.create(dto));
   }
 
   @ApiResponse({
@@ -71,7 +70,7 @@ export class CommentController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   public async deleteComment(@Param('id') commentId: string): Promise<string> {
-    const result = await this.commentService.deleteComment(commentId);
+    const result = await this.commentService.delete(commentId);
 
     if (result === null) {
       return `Comment with id: ${commentId} is not found`;

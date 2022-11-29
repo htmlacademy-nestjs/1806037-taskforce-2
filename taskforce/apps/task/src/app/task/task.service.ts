@@ -14,13 +14,13 @@ export class TaskService {
     private readonly taskRepository: TaskMemoryRepository,
   ) { }
 
-  public async createTask(dto: CreateTaskDto): Promise<TaskInterface> {
+  public async create(dto: CreateTaskDto): Promise<TaskEntity> {
     const newTask = new TaskEntity(dto);
 
     return await this.taskRepository.create(newTask);
   }
 
-  public async getTasks(paginationCount?: number): Promise<TaskInterface[]> {
+  public async get(paginationCount?: number): Promise<TaskEntity[]> {
     if (paginationCount) {
       return await this.taskRepository.findTasks(paginationCount);
     }
@@ -28,7 +28,7 @@ export class TaskService {
     return await this.taskRepository.findTasks(DEFAULT_PAGINATION_COUNT);
   }
 
-  public async getTaskById(taskId: string): Promise<TaskInterface | null> {
+  public async getTaskById(taskId: string): Promise<TaskEntity | null> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
@@ -38,7 +38,7 @@ export class TaskService {
     return existTask;
   }
 
-  public async updateTaskById(taskId: string, dto: UpdateTaskDto): Promise<TaskInterface | null> {
+  public async updateTaskById(taskId: string, dto: UpdateTaskDto): Promise<TaskEntity | null> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
@@ -48,7 +48,7 @@ export class TaskService {
     return await this.taskRepository.update(taskId, dto);
   }
 
-  public async addReplyToTaskById(taskId: string, performerInfo: any): Promise<TaskDto | null> {
+  public async addReplyToTaskById(taskId: string, performerInfo: any): Promise<TaskEntity | null> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
@@ -76,7 +76,7 @@ export class TaskService {
     return await this.taskRepository.delete(taskId);
   }
 
-  public async updateStatusTask(taskId: string, status: keyof typeof TaskStatusEnum): Promise<TaskInterface | string | null> {
+  public async updateStatusTask(taskId: string, status: keyof typeof TaskStatusEnum): Promise<TaskEntity | string | null> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {

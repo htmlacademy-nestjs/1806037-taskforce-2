@@ -11,7 +11,7 @@ export class CommentService {
     private readonly discussRepository: DiscussionMemoryRepository,
   ) { }
 
-  public async createComment(dto: CreateCommentDto): Promise<CommentDto> {
+  public async create(dto: CreateCommentDto): Promise<CommentEntity> {
     const comment = new CommentEntity(dto);
 
     return await this.discussRepository.create(comment);
@@ -25,7 +25,7 @@ export class CommentService {
     return await this.discussRepository.find(DEFAULT_PAGINATION_COUNT);
   }
 
-  public async getComment(commentId: string): Promise<CommentDto | null> {
+  public async getComment(commentId: string): Promise<CommentEntity | null> {
     const existComment = await this.discussRepository.findById(commentId);
 
     if (!existComment) {
@@ -35,7 +35,7 @@ export class CommentService {
     return existComment;
   }
 
-  public async deleteComment(commentId: string): Promise<void | null> {
+  public async delete(commentId: string): Promise<void | null> {
     const existComment = await this.discussRepository.findById(commentId);
 
     if (!existComment) {

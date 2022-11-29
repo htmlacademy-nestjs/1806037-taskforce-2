@@ -3,15 +3,14 @@ import * as dayjs from 'dayjs';
 
 import { Injectable } from "@nestjs/common";
 import { CRUDRepositoryInterface } from '@taskforce/core';
-import { CommentDto } from "../comment/dto/comment.dto";
 import { CommentEntity } from "./entities/comment.entity";
 import { DEFAULT_COMMENT_COUNT } from '../../assets/constants';
 
 @Injectable()
-export class DiscussionMemoryRepository implements CRUDRepositoryInterface<CommentEntity, string, CommentDto> {
+export class DiscussionMemoryRepository implements CRUDRepositoryInterface<CommentEntity, string, CommentEntity> {
   private discussRepository: object = {};
 
-  public async create(item: CommentEntity): Promise<CommentDto> {
+  public async create(item: CommentEntity): Promise<CommentEntity> {
     // const id = 1;
     const id = crypto.randomUUID();
 
@@ -20,17 +19,17 @@ export class DiscussionMemoryRepository implements CRUDRepositoryInterface<Comme
     return this.discussRepository[id];
   }
 
-  public async find(paginationCount: number): Promise<CommentDto[]> {
+  public async find(paginationCount: number): Promise<CommentEntity[]> {
     const comments =  Object.values(this.discussRepository);
 
     return comments.slice((paginationCount - 1) * DEFAULT_COMMENT_COUNT, paginationCount * DEFAULT_COMMENT_COUNT);
   }
 
-  public async findById(id: string): Promise<CommentDto> {
+  public async findById(id: string): Promise<CommentEntity> {
     return this.discussRepository[id];
   }
 
-  public async update(id: string, item: CommentEntity): Promise<CommentDto> {
+  public async update(id: string, item: CommentEntity): Promise<CommentEntity> {
     throw new Error("Method not implemented.");
   }
 

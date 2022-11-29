@@ -34,7 +34,7 @@ export class TaskController {
     // ЗДЕСЬ ЕСТЬ МОМЕНТ С СОЗДАНИЕМ КАТЕГОРИЙ, НО ЭТО В РАЗДЕЛЕ С БД!!!
 
 
-    return fillDTO(TaskDto, await this.taskService.createTask(newTask));
+    return fillDTO(TaskDto, await this.taskService.create(newTask));
   }
 
   @ApiResponse({
@@ -47,10 +47,10 @@ export class TaskController {
     const paginationCount = Number(Number(page).toFixed(0));
 
     if (!isNaN(paginationCount) && paginationCount > 1) {
-      return fillDTO(TaskDto, await this.taskService.getTasks(paginationCount));
+      return fillDTO(TaskDto, await this.taskService.get(paginationCount));
     }
 
-    return fillDTO(TaskDto, await this.taskService.getTasks());
+    return fillDTO(TaskDto, await this.taskService.get());
   }
 
   @ApiResponse({

@@ -10,27 +10,27 @@ import { UpdateTaskDto } from '../task/dto/update-task.dto';
 import { TaskDto } from '../task/dto/task.dto';
 
 @Injectable()
-export class TaskMemoryRepository implements CRUDRepositoryInterface<TaskEntity, string, TaskDto> {
+export class TaskMemoryRepository implements CRUDRepositoryInterface<TaskEntity, string, TaskEntity> {
   private taskRepository: object = {};
 
-  public async create(item: TaskEntity): Promise<TaskDto> {
+  public async create(item: TaskEntity): Promise<TaskEntity> {
     const id = crypto.randomUUID();
     this.taskRepository[id] = { _id: id, ...item.toObject(), createdAt: dayjs().toDate() };
 
     return this.taskRepository[id];
   }
 
-  public async findTasks(paginationCount: number): Promise<TaskDto[]> {
+  public async findTasks(paginationCount: number): Promise<TaskEntity[]> {
     const filterTasks = Object.values(this.taskRepository).filter((item: TaskEntity) => item.status === TaskStatusEnum.New);
 
     return filterTasks.slice((paginationCount - 1) * DEFAULT_TASKS_COUNT, paginationCount * DEFAULT_TASKS_COUNT);
   }
 
-  public async findById(id: string): Promise<TaskDto> {
+  public async findById(id: string): Promise<TaskEntity> {
     return this.taskRepository[id];
   }
 
-  public async update(id: string, item: any): Promise<TaskDto> {
+  public async update(id: string, item: any): Promise<TaskEntity> {
     const updatedAtArr: Array<any> = this.taskRepository[id].updatedAt;
     updatedAtArr.push(dayjs().toDate());
 
@@ -39,7 +39,7 @@ export class TaskMemoryRepository implements CRUDRepositoryInterface<TaskEntity,
     return this.taskRepository[id];
   }
 
-  public async addReplyPerformerToTaskById(id: string, payload: any): Promise<TaskDto> {
+  public async addReplyPerformerToTaskById(id: string, payload: any): Promise<TaskEntity> {
     const repliedPerformers: Array<any> = this.taskRepository[id].repliedPerformers;
     repliedPerformers.push(payload);
 

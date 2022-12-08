@@ -1,0 +1,39 @@
+POST http://localhost:3333/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "zhora4@yahoo.com",
+  "password": "Customer",
+  "role": "Performer",
+  "firstname": "Zhora",
+  "lastname": "Petin",
+  "dateBirth": "2000-01-01",
+  "city": "Moscow"
+}
+
+###
+GET http://localhost:3333/api/users/63923e3bde079da10ffc0c8d
+
+###
+PUT http://localhost:3333/api/users/63923e3bde079da10ffc0c8d
+Content-Type: application/json
+
+{
+  "role": "Customer",
+  "firstname": "Petyaaaaa",
+  "description": "BBBBB"
+}
+
+###
+PUT http://localhost:3333/api/users/63923e3bde079da10ffc0c8d/updatepassword
+Content-Type: application/json
+
+{
+  "oldPassword": "12345678",
+  "newPassword": "123456"
+}
+
+###
+DELETE http://localhost:3333/api/users/63923e3bde079da10ffc0c8d/
+
+###

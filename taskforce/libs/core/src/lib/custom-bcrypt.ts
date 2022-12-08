@@ -2,7 +2,7 @@ import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 
 const SALT_ROUNDS = 10;
 
-const SALT = genSaltSync(SALT_ROUNDS);
+export const SALT = genSaltSync(SALT_ROUNDS);
 
 export const getHashPassword = (password: string): string => {
   return hashSync(password, SALT);

@@ -1,10 +1,9 @@
-import { genSaltSync } from "bcrypt";
 import { ClassConstructor, plainToInstance } from "class-transformer";
-
-const SALT_ROUNDS = 10;
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
 };
 
-export const SALT = genSaltSync(SALT_ROUNDS);
+export function getMongoConnectionString({username, password, host, port, databaseName, authDatabase}): string {
+  return `mongodb://${username}:${password}@${host}:${port}/${databaseName}?authSource=${authDatabase}`;
+}

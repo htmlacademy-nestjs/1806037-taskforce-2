@@ -3,10 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsDefined, IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength, Validate } from 'class-validator';
 import { AdultDateValidator } from "@taskforce/core";
+import { UserRoleType } from "libs/shared-types/src/lib/type/user-role.type";
 
 export class CreateUserDto {
   @ApiProperty({
-    description: 'The uniq emaol of user',
+    description: 'The uniq email of user',
     required: true,
     example: 'zhora@yahoo.com'
   })
@@ -36,7 +37,7 @@ export class CreateUserDto {
     message: `'Customer' or 'Performer'`
   })
   @IsDefined()
-  public role: keyof typeof UserRoleEnum;
+  public role: UserRoleType;
 
   @ApiProperty({
     required: true,
@@ -46,7 +47,7 @@ export class CreateUserDto {
     message: 'Firstname is shorter than 3 characters'
   })
   @MaxLength(50, {
-    message: 'Password is longer than 50 characters'
+    message: 'Firstname is longer than 50 characters'
   })
   @IsDefined()
   public firstname: string;
@@ -56,10 +57,10 @@ export class CreateUserDto {
   })
   @IsString()
   @MinLength(3, {
-    message: 'Firstname is shorter than 3 characters'
+    message: 'Lastname is shorter than 3 characters'
   })
   @MaxLength(50, {
-    message: 'Password is longer than 50 characters'
+    message: 'Lastname is longer than 50 characters'
   })
   @IsDefined()
   public lastname: string;

@@ -4,16 +4,16 @@ import { IsDefined, IsString, MaxLength, MinLength } from "class-validator";
 
 export class UpdatePasswordUserDto {
   @ApiProperty()
-  @Expose({name: 'old_password'})
+  @Expose({name: 'oldPassword'})
   @IsString()
   @IsDefined()
   public oldPassword: string;
 
   @ApiProperty()
-  @Expose({name: 'new_password'})
+  @Expose({name: 'newPassword'})
   @IsString()
   @MinLength(6, {
-    message: 'Password is shorter than 6 characters'
+    message: 'Password is shorter than 6 characters',
   })
   @MaxLength(12, {
     message: 'Password is longer than 12 characters'

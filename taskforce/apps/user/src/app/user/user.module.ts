@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserMemoryModule } from '../user-memory/user-memory.module';
+import { UserRepositoryModule } from '../user-repository/user-repository.module';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [UserMemoryModule],
+  imports: [UserRepositoryModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService]

@@ -1,9 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { AdultDateValidator } from "@taskforce/core";
+import { UserRoleEnum } from "@taskforce/shared-types";
 import { Expose } from "class-transformer";
-import { ArrayMaxSize, IsString, MaxLength, MinLength, Validate } from 'class-validator';
+import { ArrayMaxSize, IsEnum, IsString, MaxLength, MinLength, Validate } from 'class-validator';
+import { UserRoleType } from "libs/shared-types/src/lib/type/user-role.type";
 
 export class UpdatePerformerUserDto {
+  @ApiProperty()
+  @Expose()
+  @IsEnum(UserRoleEnum)
+  public role: UserRoleType;
+
   @ApiProperty()
   @Expose()
   @IsString()
@@ -14,6 +21,17 @@ export class UpdatePerformerUserDto {
     message: 'Password is longer than 50 characters'
   })
   public firstname: string;
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  @MinLength(3, {
+    message: 'Lastname is shorter than 3 characters'
+  })
+  @MaxLength(50, {
+    message: 'Lastname is longer than 50 characters'
+  })
+  public lastname: string;
 
   @ApiProperty()
   @Expose()

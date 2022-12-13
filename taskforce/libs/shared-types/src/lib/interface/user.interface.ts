@@ -1,10 +1,9 @@
-import { UserRoleEnum } from "./user-role.enum";
+import { UserRoleType } from "../type/user-role.type";
 
 export interface UserInterface {
-  _id: string;
   email: string;
   passwordHash: string;
-  role: keyof typeof UserRoleEnum;
+  role: UserRoleType;
   firstname: string;
   lastname: string;
   city: string;

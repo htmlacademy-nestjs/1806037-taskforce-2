@@ -1,97 +1,133 @@
 import { Injectable } from '@nestjs/common';
-import { TaskInterface, TaskStatusEnum } from '@taskforce/shared-types';
+import { TaskInterface, TaskStatusEnum, TaskStatusType } from '@taskforce/shared-types';
 import { DEFAULT_PAGINATION_COUNT } from '../../assets/constants';
 import { checkUpdateStatusTaskFn } from '../../assets/heplers';
-import { TaskEntity } from '../task-memory/entities/task.entity';
-import { TaskMemoryRepository } from '../task-memory/task-memory.repository';
+import { TaskCategoryService } from '../task-category/task-category.service';
+import { TaskEntity } from '../task-repository/entities/task.entity';
+import { TaskCategoryRepository } from '../task-repository/task-category.repository';
+import { TaskRepository } from '../task-repository/task.repository';
+import { ReplyPerformerUserIdDto } from './dto/reply-performer-userid.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskDto } from './dto/task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { ChoosePerformeruserIdDto } from './dto/choose-performer-userid.dto';
 
 @Injectable()
 export class TaskService {
   constructor (
-    private readonly taskRepository: TaskMemoryRepository,
+    private readonly taskRepository: TaskRepository,
+    private readonly taskCategoryService: TaskCategoryService,
+    private readonly taskCategoryRepository: TaskCategoryRepository,
   ) { }
 
   public async create(dto: CreateTaskDto): Promise<TaskEntity> {
-    const newTask = new TaskEntity(dto);
+    let existCategory = await this.taskCategoryService.getByName(dto.category);
 
-    return await this.taskRepository.create(newTask);
+    if (!existCategory) {
+      const createCategoryDto = { title: dto.category };
+      existCategory = await this.taskCategoryService.create(createCategoryDto);
+    }
+
+    const newTask = new TaskEntity(dto, existCategory);
+
+    return await this.taskRepository.create(newTask) as unknown as TaskEntity;
   }
 
-  public async get(paginationCount?: number): Promise<TaskEntity[]> {
+  public async getAll(paginationCount?: number): Promise<TaskEntity[]> {
     if (paginationCount) {
-      return await this.taskRepository.findTasks(paginationCount);
+      return await this.taskRepository.find(paginationCount) as unknown as TaskEntity[];
     }
 
-    return await this.taskRepository.findTasks(DEFAULT_PAGINATION_COUNT);
+    return await this.taskRepository.find(DEFAULT_PAGINATION_COUNT) as unknown as TaskEntity[];
   }
 
-  public async getTaskById(taskId: string): Promise<TaskEntity | null> {
+  public async getTaskById(taskId: number): Promise<TaskEntity | null> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      return null;
+      throw new Error(`Task with this id: ${taskId} was not found`);
     }
 
-    return existTask;
+    return existTask as unknown as TaskEntity;
   }
 
-  public async updateTaskById(taskId: string, dto: UpdateTaskDto): Promise<TaskEntity | null> {
+  public async updateTaskById(taskId: number, dto: UpdateTaskDto): Promise<TaskEntity> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      return null;
+      throw new Error(`Task with this id: ${taskId} is not found`);
     }
 
-    return await this.taskRepository.update(taskId, dto);
+    let existCategory = await this.taskCategoryService.getByName(dto.category);
+
+    if (!existCategory) {
+      const createCategoryDto = { title: dto.category };
+      existCategory = await this.taskCategoryService.create(createCategoryDto);
+    }
+
+    return await this.taskRepository.update(taskId, dto, existCategory) as unknown as TaskEntity;
   }
 
-  public async addReplyToTaskById(taskId: string, performerInfo: any): Promise<TaskEntity | null> {
+  public async updateStatusTask(taskId: number, status: TaskStatusType): Promise<TaskEntity | string> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      return null;
+      throw new Error(`Task with this id: ${taskId} is not found`);
     }
 
-    // ЗДЕСЬ НУЖНА РЕАЛИЗАЦИЯ ПРОВЕРКИ НА УНИКАЛЬНОСТЬ ОТКЛИКА
+    const currentStatus = existTask.status;
+    const checkResult =  checkUpdateStatusTaskFn(currentStatus, status);
 
-    // const repliedPerformersList = existTask.repliedPerformers;
+    if (typeof checkResult !== 'boolean') {
+      throw new Error(checkResult);
+    }
 
-    // for (const item of repliedPerformersList) {
-    //   console.log(item);
-    // }
-
-    return await this.taskRepository.addReplyPerformerToTaskById(taskId, performerInfo);
+    return await this.taskRepository.updateStatus(taskId, status) as unknown as TaskEntity;
   }
 
-  public async deleteTaskById(taskId: string): Promise<void | null> {
+  public async choosePerformerUserIdToTaskById(taskId: number, dto: ChoosePerformeruserIdDto): Promise<TaskEntity> {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      return null;
+      throw new Error(`Task with this id: ${taskId} is not found`);
+    }
+
+    const { userId } = dto;
+
+    if (userId === existTask.currentPerformer) {
+      throw new Error(`This user: ${userId} has already been selected as the task executor`);
+    }
+
+    return await this.taskRepository.choosePerformerUserIdToTaskById(taskId, userId) as TaskEntity;
+  }
+
+  public async addReplyPerformerUserIdToTaskById(taskId: number, dto: ReplyPerformerUserIdDto): Promise<TaskEntity> {
+    const existTask = await this.taskRepository.findById(taskId);
+
+    if (!existTask) {
+      throw new Error(`Task with this id: ${taskId} is not found`);
+    }
+
+    const { userId } = dto;
+
+    const isTargetReply = existTask.repliedPerformers.find(item => item === userId)
+
+    if (isTargetReply) {
+      throw new Error(`This user: ${userId} has already responded to this task`);
+    }
+
+    return await this.taskRepository.addReplyPerformerToTaskById(taskId, userId) as TaskEntity;
+  }
+
+  public async deleteTaskById(taskId: number): Promise<void> {
+    const existTask = await this.taskRepository.findById(taskId);
+
+    if (!existTask) {
+      throw new Error(`Task with this id: ${taskId} is not found`);
     }
 
     return await this.taskRepository.delete(taskId);
   }
 
-  public async updateStatusTask(taskId: string, status: keyof typeof TaskStatusEnum): Promise<TaskEntity | string | null> {
-    const existTask = await this.taskRepository.findById(taskId);
-
-    if (!existTask) {
-      return null;
-    }
-
-    const currentStatus = existTask.status;
-
-    const checkResult =  checkUpdateStatusTaskFn(currentStatus, status);
-
-    if (typeof checkResult !== 'boolean') {
-      return checkResult;
-    }
-
-    return await this.taskRepository.update(taskId, status);
-  }
 
 }

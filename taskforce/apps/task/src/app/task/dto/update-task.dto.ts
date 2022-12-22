@@ -7,18 +7,13 @@ export class UpdateTaskDto {
   @ApiProperty()
   @Expose()
   @IsString()
-  public author: string;
-
-  @ApiProperty()
-  @Expose()
-  @IsString()
   @MinLength(20, {
     message: 'The «title» field must be at least 20 characters long',
   })
   @MaxLength(100, {
     message: 'The «title» field must be no more than 100 characters',
   })
-  title: string;
+  title?: string;
 
   @ApiProperty()
   @Expose()
@@ -29,11 +24,11 @@ export class UpdateTaskDto {
   @MaxLength(1024, {
     message: 'The «description» field must be no more than 1024 characters',
   })
-  description: string;
+  description?: string;
 
   @ApiProperty()
   @Expose()
-  category: string;
+  category?: string;
 
   @ApiProperty()
   @Expose()

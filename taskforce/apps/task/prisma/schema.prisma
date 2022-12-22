@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id                 Int @id @default(autoincrement())
+  userId             String
+  title              String
+  status             String // ТУТ НУЖЕН ENUM
+  description        String
+  category           Category[] // ТУТ НАДО РЕШИТЬ
+  price              Int?
+  lifeTime           DateTime?
+  image              String?
+  address            String?
+  tags               String[]
+  repliedPerformers  String[] // id этих юзеров
+  currentPerformer   String? // id юзера
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now())
+  // comments           String[] // id этих комментов
+}
+
+model Category {
+  id             Int @id @default(autoincrement())
+  title          String
+  posts          Task[]
+}

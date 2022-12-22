@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TaskModule } from './task/task.module';
-import { TaskMemoryModule } from './task-memory/task-memory.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { TaskRepositoryModule } from './task-repository/task-repository.module';
+import { TaskCategoryModule } from './task-category/task-category.module';
 
 @Module({
-  imports: [TaskModule, TaskMemoryModule],
+  imports: [PrismaModule, TaskRepositoryModule, TaskModule, TaskCategoryModule],
   controllers: [],
   providers: [],
 })

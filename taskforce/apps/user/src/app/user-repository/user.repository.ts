@@ -12,6 +12,7 @@ import { CreateUserDto } from '../auth/dto/create-user.dto';
 @Injectable()
 export class UserRepository {
   private readonly userMongoDbCollection: Collection;
+
   constructor (
     @InjectConnection() private readonly userMongoDbConnection: Connection,
     @InjectModel(CustomerUserEntity.name) private readonly customerUserModel: Model<CustomerUserEntity>,
@@ -25,7 +26,6 @@ export class UserRepository {
 
     if (role === UserRoleEnum.Customer) {
       const newCustomerUser = new CustomerUserEntity().fillEntity(dto).setPassword(password);
-      console.log(typeof newCustomerUser.role);
       const newCustomerUserModel = new this.customerUserModel(newCustomerUser);
 
       return await newCustomerUserModel.save();

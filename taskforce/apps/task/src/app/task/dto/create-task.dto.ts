@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CurrentDateValidator } from '@taskforce/core';
+import { TaskCategoryInterface } from '@taskforce/shared-types';
 import { Expose } from 'class-transformer';
-import { IsArray, IsDefined, IsNotEmpty, IsString, MaxLength, Min, MinLength, Validate } from 'class-validator';
+import { IsArray, IsDefined, IsInt, IsNotEmpty, IsString, MaxLength, Min, MinLength, Validate } from 'class-validator';
 
 export class CreateTaskDto {
   @ApiProperty()
@@ -9,7 +10,7 @@ export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   @IsDefined()
-  public author!: string;
+  public userId!: string;
 
   @ApiProperty()
   @Expose()
@@ -43,6 +44,7 @@ export class CreateTaskDto {
 
   @ApiProperty()
   @Expose()
+  @IsInt()
   @Min(0)
   price?: number;
 

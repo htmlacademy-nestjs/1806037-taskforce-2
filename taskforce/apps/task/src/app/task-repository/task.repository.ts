@@ -2,14 +2,13 @@ import * as crypto from 'crypto';
 import * as dayjs from'dayjs';
 
 import { Injectable } from '@nestjs/common';
-import { CRUDRepositoryInterface } from '@taskforce/core';
-import { TaskCategoryInterface, TaskInterface, TaskStatusEnum, TaskStatusType } from '@taskforce/shared-types';
+import { TaskCategoryInterface, TaskStatusType } from '@taskforce/shared-types';
 import { TaskEntity } from './entities/task.entity';
-import { DEFAULT_TASKS_COUNT } from '../../assets/constants';
 import { UpdateTaskDto } from '../task/dto/update-task.dto';
-import { TaskDto } from '../task/dto/task.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Task } from '@prisma/client';
+import { DEFAULT_TASKS_LIMIT } from '../../assets/constant/constants';
+import { TaskQuery } from '../../assets/query/task.query';
 
 @Injectable()
 export class TaskRepository {
@@ -17,16 +16,14 @@ export class TaskRepository {
     private readonly prismaService: PrismaService,
   ) { }
 
-  private taskRepository: object = {};
-
   public async create(item: TaskEntity): Promise<Task> {
     const entityData = item.toObject();
     return await this.prismaService.task.create({
       data: {
         ...entityData,
         category: {
-          connect: [...entityData.category],
-        },
+          connect: { id: entityData.category.id }
+        }
       },
       include: {
         category: true,
@@ -34,13 +31,47 @@ export class TaskRepository {
     });
   }
 
-  public async find(paginationCount: number): Promise<Task[]> {
+  public async find(query: TaskQuery): Promise<Task[]> {
+    const { limit, page, sort, categories, city, tags } = query;
+
     return await this.prismaService.task.findMany({
-      skip: (paginationCount - 1) * DEFAULT_TASKS_COUNT,
-      take: DEFAULT_TASKS_COUNT,
+      where: {
+        category: {
+          some: {
+            title: {
+              in: categories,
+            },
+          }
+        },
+        tags: (() => {
+          if (!tags) {
+            return undefined;
+          }
+
+          return {
+            hasSome: tags,
+          };
+        })(),
+      },
+      take: limit,
       include: {
         category: true
-      }
+      },
+      orderBy: [
+        (() => {
+          if (sort === 'desc') {
+            return {
+              createdAt: sort,
+            };
+          }
+          if (sort === 'popular') {
+            return {
+              repliedPerformers: 'desc',
+            };
+          }
+        })()
+      ],
+      skip: (page - 1) * limit,
     });
   }
 
@@ -62,9 +93,13 @@ export class TaskRepository {
       },
       data: {
         ...item,
+        tags: {
+          push: [...item.tags],
+        },
         category: {
-          deleteMany: {},
-          connect: [{id: category.id}],
+          set: {
+            id: category.id,
+          }
         },
       },
       include: {

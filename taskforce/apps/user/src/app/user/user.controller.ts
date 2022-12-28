@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Put, UseGuards, UsePipes } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { fillDTO } from '@taskforce/core';
-import { UserRoleEnum } from '@taskforce/shared-types';
+import { MongoIdValidationPipe, UserRoleEnum } from '@taskforce/shared-types';
 import { validate } from 'class-validator';
 import { UpdateUserDtoType } from '../../assets/type/types';
+import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CustomerUserDto } from './dto/customer-user.dto';
 import { PerformerUserDto } from './dto/performer-user.dro';
 import { UpdateCustomerUserDto } from './dto/update-customer-user.dto';
@@ -11,8 +12,9 @@ import { UpdatePasswordUserDto } from './dto/update-password-user.dto';
 import { UpdatePerformerUserDto } from './dto/update-performer-user.dto';
 import { UserService } from './user.service';
 
-@ApiTags('users')
-@Controller('users')
+
+@ApiTags('user')
+@Controller('user')
 export class UserController {
   private readonly logger: LoggerService = new Logger(UserController.name);
 
@@ -24,9 +26,10 @@ export class UserController {
     status: HttpStatus.OK,
     description: 'Getting a user by id'
   })
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getUserById(@Param('id') id: string) {
+  async getUserById(@Param('id', MongoIdValidationPipe) id: string) {
     try {
       const existUser = await this.userService.findUserById(id);
 
@@ -47,19 +50,12 @@ export class UserController {
     status: HttpStatus.CREATED,
     description: 'Updating the user password by id'
   })
+  @UseGuards(JwtAuthGuard)
   @Put(':id/updatepassword')
   @HttpCode(HttpStatus.CREATED)
-  async updatePasswordUserById(@Param('id') id: string, @Body() dto: UpdatePasswordUserDto) {
-    const updatePasswordObj = fillDTO(UpdatePasswordUserDto, dto);
-    const errors = await validate(updatePasswordObj);
-
+  async updatePasswordUserById(@Param('id', MongoIdValidationPipe) id: string, @Body() dto: UpdatePasswordUserDto) {
     try {
-      if (errors.length > 0) {
-        throw new Error(errors.toString());
-      }
-
       return await this.userService.updatePassword(id, dto);
-      // return 'Password sucessfull updated';
     } catch (error) {
       const err = error as Error;
       this.logger.error(err.message, err.stack);
@@ -71,14 +67,19 @@ export class UserController {
     status: HttpStatus.CREATED,
     description: 'Updating user data by id'
   })
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   @HttpCode(HttpStatus.CREATED)
-  async updateUserById(@Param('id') id: string, @Body() dto: UpdateUserDtoType) {
+  @UsePipes()
+  async updateUserById(@Param('id', MongoIdValidationPipe) id: string, @Body() dto: UpdateUserDtoType) {
+    const { role } = await this.getUserById(id) as CustomerUserDto | PerformerUserDto;
+
     let updateUserData: UpdateUserDtoType;
-    if (dto.role === UserRoleEnum.Customer) {
+    if (role === UserRoleEnum.Customer) {
       updateUserData = fillDTO(UpdateCustomerUserDto, dto);
+      console.log(updateUserData);
     }
-    if (dto.role === UserRoleEnum.Performer) {
+    if (role === UserRoleEnum.Performer) {
       updateUserData = fillDTO(UpdatePerformerUserDto, dto);
     }
 
@@ -89,7 +90,7 @@ export class UserController {
         throw new Error(errors.toString());
       }
 
-      const existUser = await this.userService.updateUserById(id, dto);
+      const existUser = await this.userService.updateUserById(id, updateUserData);
 
       if (existUser.role === UserRoleEnum.Customer) {
         return fillDTO(CustomerUserDto, existUser);
@@ -108,9 +109,10 @@ export class UserController {
     status: HttpStatus.OK,
     description: 'Deleting a user by id'
   })
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async deleteuserById(@Param('id') id: string) {
+  async deleteuserById(@Param('id', MongoIdValidationPipe) id: string) {
     try {
       await this.userService.deleteUserById(id);
 

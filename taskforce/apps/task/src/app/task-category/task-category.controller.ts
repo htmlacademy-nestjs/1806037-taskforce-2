@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { fillDTO, fillObject } from '@taskforce/core';
 import { validate } from 'class-validator';
@@ -24,7 +24,6 @@ export class TaskCategoryController {
   @HttpCode(HttpStatus.OK)
   async getAll() {
     try {
-
       return fillObject(TaskCategoryRdo, await this.taskCategoryService.getAll());
     } catch (err) {
       const error = err as Error;
@@ -39,8 +38,7 @@ export class TaskCategoryController {
     description: 'Get task category by id',
   })
   @Get('/:id')
-  async get(@Param('id') id: string) {
-    const categoryId = parseInt(id, 10);
+  async get(@Param('id', ParseIntPipe) categoryId: number) {
     try {
       return fillObject(TaskCategoryRdo, await this.taskCategoryService.getById(categoryId));
     } catch (err) {
@@ -82,8 +80,7 @@ export class TaskCategoryController {
   })
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string) {
-    const categoryId = parseInt(id, 10);
+  async delete(@Param('id', ParseIntPipe) categoryId: number) {
     try {
       await this.taskCategoryService.delete(categoryId);
 
@@ -102,8 +99,7 @@ export class TaskCategoryController {
   })
   @Put('/:id')
   @HttpCode(HttpStatus.CREATED)
-  async update(@Param('id') id: string, @Body() dto: UpdateTaskCategoryDto) {
-    const categoryId = parseInt(id, 10);
+  async update(@Param('id', ParseIntPipe) categoryId: number, @Body() dto: UpdateTaskCategoryDto) {
     const updateCategory = fillObject(UpdateTaskCategoryDto, dto);
     const errors = await validate(updateCategory);
 

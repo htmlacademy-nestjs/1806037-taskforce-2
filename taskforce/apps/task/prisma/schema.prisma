@@ -17,7 +17,9 @@ model Task {
   title              String
   status             String // ТУТ НУЖЕН ENUM
   description        String
-  category           Category[] // ТУТ НАДО РЕШИТЬ
+  category           Category[]
+  // Category           Category @relation(fields: [categoryId], references: [id], onUpdate: Cascade) // ТУТ НАДО РЕШИТЬ
+  // categoryId         Int // ТУТ НАДО РЕШИТЬ
   price              Int?
   lifeTime           DateTime?
   image              String?

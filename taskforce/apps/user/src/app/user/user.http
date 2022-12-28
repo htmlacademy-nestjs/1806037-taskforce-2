@@ -1,0 +1,57 @@
+POST http://localhost:3333/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "customer@customer.com",
+  "password": "11111111",
+  "role": "Customer",
+  "firstname": "Andrey",
+  "lastname": "Petrov",
+  "dateBirth": "2000-01-01",
+  "city": "Moscow"
+}
+
+###
+POST http://localhost:3333/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@users.com",
+  "password": "11111111"
+}
+
+###
+POST http://localhost:3333/api/auth/refreshtoken
+Content-Type: application/json
+
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjUwODI4LCJleHAiOjE2NzIyNjE2Mjh9.xVdKoopJUdBFau6Xga4WH0_O9HmSOkZteTgnk8MQep0"
+}
+
+###
+POST http://localhost:3333/api/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjUwODI4LCJleHAiOjE2NzIyNjE2Mjh9.xVdKoopJUdBFau6Xga4WH0_O9HmSOkZteTgnk8MQep0
+
+###
+PUT http://localhost:3333/api/user/63a599a135dbdf0fe0dd62a9/updatepassword
+Content-Type: application/json
+
+{
+  "oldPassword": "11111111",
+  "newPassword": "22222222"
+}
+
+###
+PUT http://localhost:3333/api/user/63a8aa7272c49b39ce8617f2
+Content-Type: application/json
+
+{
+  "firstname": "222222222",
+  "specialization": ["IT"]
+}
+
+###
+GET http://localhost:3333/api/auth/63925fd3abd314dda8b00a42
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjQ3NzMyLCJleHAiOjE2NzIyNDc3OTJ9.wB9h9964IBQuf5HtC5UshIwwaQqKt68mDftypmGzzpk
+
+###

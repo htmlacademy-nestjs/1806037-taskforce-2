@@ -1,7 +1,7 @@
 import { UserRoleEnum } from "@taskforce/shared-types";
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsDefined, IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength, Validate } from 'class-validator';
+import { IsDefined, IsEmail, IsEnum, IsISO8601, IsNotEmpty, IsString, MaxLength, MinLength, Validate, ValidateIf } from 'class-validator';
 import { AdultDateValidator } from "@taskforce/core";
 import { UserRoleType } from "libs/shared-types/src/lib/type/user-role.type";
 
@@ -71,6 +71,7 @@ export class CreateUserDto {
   @Validate(AdultDateValidator, {
     message: 'The user is under 18 years of age'
   })
+  @IsISO8601()
   @IsDefined()
   public dateBirth: string;
 
@@ -83,6 +84,7 @@ export class CreateUserDto {
   public city: string;
 
   @ApiProperty()
+  // @ValidateIf(obj => !(obj.avatar && obj.avatar === ''))
   @IsString() // ЗДЕСЬ ВАЛИДАЦИЯ ПРИ ЗАГРУЗКЕ ФАЙЛА
   public avatar?: string;
 }

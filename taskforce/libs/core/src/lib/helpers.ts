@@ -1,4 +1,7 @@
 import { ClassConstructor, plainToInstance } from "class-transformer";
+import { ConflictException, BadRequestException, UnauthorizedException, NotFoundException, ForbiddenException, NotImplementedException } from '@nestjs/common';
+import { ExceptionEnum } from '@taskforce/shared-types';
+import { CustomError } from '@taskforce/core';
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
@@ -10,4 +13,18 @@ export const fillObject = <T, V>(someDto: ClassConstructor<T>, plainObject: V) =
 
 export function getMongoConnectionString({username, password, host, port, databaseName, authDatabase}): string {
   return `mongodb://${username}:${password}@${host}:${port}/${databaseName}?authSource=${authDatabase}`;
+}
+
+export function handleError(error: CustomError) {
+  const { message, errorType } = error;
+
+  switch (errorType) {
+    case ExceptionEnum.BadRequest: throw new BadRequestException(message);
+    case ExceptionEnum.Unauthorized: throw new UnauthorizedException(message);
+    case ExceptionEnum.NotFound: throw new NotFoundException(message);
+    case ExceptionEnum.Forbidden: throw new ForbiddenException(message);
+    case ExceptionEnum.Conflict: throw new ConflictException(message);
+    case ExceptionEnum.NotImplemented: throw new NotImplementedException(message);
+    default: throw new Error(message);
+  }
 }

@@ -7,31 +7,24 @@ export interface AuthUserEntity extends Document { }
 
 @Schema({
   collection: 'authUser',
-  // timestamps: true,
 })
 export class AuthUserEntity {
   @Prop({
     required: true,
-    unique: true
-  })
-  public userId: string;
+    unique: false,
 
-  @Prop({
-    required: true,
   })
   public email: string;
 
   @Prop({
-    required: true,
+    default: null,
   })
   public refreshToken: string;
 
   public fillEntity(dto: AuthDataUserDto): this {
-    const { userId, email, refreshToken } = dto;
+    const { email } = dto;
 
-    this.userId = userId;
     this.email = email;
-    this.refreshToken = refreshToken;
 
     return this;
   }

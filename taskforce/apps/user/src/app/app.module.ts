@@ -9,6 +9,7 @@ import { mongoDbConfig } from '../config/mongodb.config';
 import { AuthModule } from './auth/auth.module';
 import { UserRepositoryModule } from './user-repository/user-repository.module';
 import { UserModule } from './user/user.module';
+import { AuthRepositoryModule } from './auth-repository/auth-repository.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { UserModule } from './user/user.module';
     MongooseModule.forRootAsync(getMongoDbConfig()),
     UserRepositoryModule,
     AuthModule,
-    UserModule
+    UserModule,
+    AuthRepositoryModule,
   ],
   controllers: [],
   providers: [],

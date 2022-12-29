@@ -1,14 +1,15 @@
-import { ConflictException, HttpException, HttpStatus, Injectable, Logger, LoggerService, UnauthorizedException } from '@nestjs/common';
-import { comparePassword } from '@taskforce/core';
+import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { comparePassword, CustomError } from '@taskforce/core';
 import { UserEntityType } from '../../assets/type/types';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from '../user-repository/user.repository';
 import { JwtService } from '@nestjs/jwt/dist';
-import { UserDto } from './dto/user.dto';
-import { AuthDataUserDto } from './dto/auth-data-user.dto';
 import { JwtRefreshTokenDto } from './dto/jwt-refresh-token.dto';
-import { JwtPayloadType } from '../../assets/type/jwt-payload.type';
+import { ExceptionEnum } from '@taskforce/shared-types';
+import { AuthRepository } from '../auth-repository/auth.repository';
+import { AuthUserEntity } from '../auth-repository/entity/auth-user.entity';
+import { JwtPayloadDto } from './dto/jwt-payload.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
 
   constructor (
     private readonly userRepository: UserRepository,
+    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
   ) { }
 
@@ -23,19 +25,18 @@ export class AuthService {
     const existUser = await this.userRepository.findByEmail(dto.email);
 
     if (existUser) {
-      throw new ConflictException('User already exists');
+      throw new CustomError('User already exists', ExceptionEnum.Conflict);
     }
 
     return await this.userRepository.create(dto);
   }
-
 
   public async verifyUser(email: string): Promise<UserEntityType> {
 
     const existUser = await this.userRepository.findByEmail(email);
 
     if (!existUser) {
-      throw new UnauthorizedException(`The user with this email: ${email} was not found`);
+      throw new CustomError(`The user with this email: ${email} was not found`, ExceptionEnum.NotFound);
     }
 
     return existUser;
@@ -45,22 +46,27 @@ export class AuthService {
     const isCheckPassword = comparePassword(password, passwordHash);
 
     if (!isCheckPassword) {
-      throw new UnauthorizedException(`Invalid password`);
+      throw new CustomError(`Invalid password`, ExceptionEnum.Unauthorized);
     }
   }
 
   public async login(dto: AuthUserDto) {
     const {email, password} = dto;
 
-    const existUser = await this.verifyUser(email);
+      const existUser = await this.verifyUser(email).catch((err) => {
+        throw new CustomError(err, ExceptionEnum.NotFound);
+      });
 
-    await this.verifyPassword(password, existUser.passwordHash);
+      await this.verifyPassword(password, existUser.passwordHash).catch((err) => {
+        throw new CustomError(err, ExceptionEnum.Conflict);
+      });
 
-    if (await this.userRepository.getAuthUserByEmail(email)) {
-      throw new ConflictException(`User with this email: "${existUser.email}" has already been authenticated.`);
-    }
+    const tokens = {
+      access_token: null,
+      refresh_token: null,
+    };
 
-    const payload: JwtPayloadType = {
+    const payload = {
       sub: existUser._id,
       email: existUser.email,
       role: existUser.role,
@@ -68,53 +74,47 @@ export class AuthService {
       lastname: existUser.lastname,
     };
 
-    const tokens = {
-      access_token: await this.jwtService.signAsync(payload),
-      refresh_token: await this.jwtService.signAsync(payload, {
-        algorithm: 'HS256',
-        expiresIn: '3h',
-      })
-    };
+    // const refreshToken = await this.jwtService.signAsync(payload, {
+    //   algorithm: 'HS256',
+    //   expiresIn: '3h',
+    // }).catch((err) => {
+    //     throw new CustomError(err, ExceptionEnum.Conflict);
+    // });
 
     // TODO
     // Добавляем данного пользователя в БД для авторизованных
-    const authDataUser: AuthDataUserDto = {
-      userId: existUser._id,
+    const authDataUser = {
       email: existUser.email,
-      refreshToken: tokens.refresh_token,
     };
 
     try {
-      await this.userRepository.addAuthUser(authDataUser);
+      const { id } = await this.authRepository.addAuthUser(authDataUser);
+      payload['authId'] = id;
+      tokens.access_token = await this.jwtService.signAsync(payload);
+      tokens.refresh_token = await this.jwtService.signAsync(payload, {
+        algorithm: 'HS256',
+        expiresIn: '3h',
+      });
+      await this.authRepository.updateAuthUser({
+        id: id,
+        refreshToken: tokens.refresh_token,
+      });
     } catch (err) {
       const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      throw new ConflictException(`User with this email: "${existUser.email}" has already been authenticated.`)
+      throw new CustomError(error.message, ExceptionEnum.Conflict)
     }
-    //
 
     return tokens;
   }
 
-  public async refreshToken(dto: JwtRefreshTokenDto) {
-    const { refresh_token } = dto;
+  public async refreshToken(refreshToken: string) {
+    const jwtPayload: JwtPayloadDto = await this.jwtService.verifyAsync(refreshToken).catch((err) => {
+      throw new CustomError(err, ExceptionEnum.Conflict);
+    });
 
-    let jwtPayload: JwtPayloadType;
+    const existAuthUsers = await this.authRepository.getAuthUserByEmail(jwtPayload.email) as unknown as AuthUserEntity[];
 
-    try {
-      jwtPayload = await this.jwtService.verifyAsync(refresh_token);
-    } catch {
-      throw new ConflictException(`This refresh token is invalid.`);
-    }
-
-    const existAuthUser = await this.userRepository.getAuthUserByEmail(jwtPayload.email) as unknown as AuthDataUserDto;
-
-    if (existAuthUser.refreshToken !== refresh_token) {
-      throw new ConflictException(`This refresh token is invalid.`);
-    }
-
-    const payload: JwtPayloadType = {
+    const payload = {
       sub: jwtPayload.sub,
       email: jwtPayload.email,
       role: jwtPayload.role,
@@ -122,27 +122,22 @@ export class AuthService {
       lastname: jwtPayload.lastname,
     };
 
+
+    if (!existAuthUsers.find(item => {
+      if (item.refreshToken === refreshToken) {
+        payload['authId'] = item.id;
+        return item;
+      }
+    })) {
+      throw new CustomError(`This refresh token is invalid.`, ExceptionEnum.Conflict);
+    }
+
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
 
-  public async logout(token: string) {
-    const jwtPayload: JwtPayloadType = await this.jwtService.verifyAsync(token, {
-      ignoreExpiration: true,
-    });
-
-    return await this.userRepository.removeAuthUser(jwtPayload.email);
+  public async logout(authId: string) {
+    return await this.authRepository.removeAuthUser(authId);
   }
-
-  public async getUserById(id: string): Promise<UserDto> {
-    const existUser = await this.userRepository.findById(id);
-
-    if (!existUser) {
-      throw new UnauthorizedException(`The user with this id: ${id} was not found`);
-    }
-
-    return existUser as UserDto;
-  }
-
 }

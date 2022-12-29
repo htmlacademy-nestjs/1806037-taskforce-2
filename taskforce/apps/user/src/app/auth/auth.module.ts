@@ -7,10 +7,12 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategies';
 import { AuthTokenVerificationService } from './auth-token-verification.service';
+import { AuthRepositoryModule } from '../auth-repository/auth-repository.module';
 
 @Module({
   imports: [
     UserRepositoryModule,
+    AuthRepositoryModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: getJwtConfig,

@@ -16,21 +16,21 @@ POST http://localhost:3333/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "user@users.com",
+  "email": "customer@customer.com",
   "password": "11111111"
 }
 
 ###
 POST http://localhost:3333/api/auth/refreshtoken
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E4YWE3MjcyYzQ5YjM5Y2U4NjE3ZjIiLCJlbWFpbCI6ImN1c3RvbWVyQGN1c3RvbWVyLmNvbSIsInJvbGUiOiJDdXN0b21lciIsImZpcnN0bmFtZSI6IjIyMjIyMjIyMiIsImxhc3RuYW1lIjpudWxsLCJhdXRoSWQiOiI2M2FkYzliZGZkOGU1NWYxNWFjZTIyMzEiLCJpYXQiOjE2NzIzMzM3NTcsImV4cCI6MTY3MjM0NDU1N30.sRta-iHyHfFMHQaF8KwKk694HJ9P808-W6jWCn2J93s
 
-{
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjUwODI4LCJleHAiOjE2NzIyNjE2Mjh9.xVdKoopJUdBFau6Xga4WH0_O9HmSOkZteTgnk8MQep0"
-}
+# {
+#   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E4YWE3MjcyYzQ5YjM5Y2U4NjE3ZjIiLCJlbWFpbCI6ImN1c3RvbWVyQGN1c3RvbWVyLmNvbSIsInJvbGUiOiJDdXN0b21lciIsImZpcnN0bmFtZSI6IjIyMjIyMjIyMiIsImxhc3RuYW1lIjpudWxsLCJpYXQiOjE2NzIzMjM3MTAsImV4cCI6MTY3MjMzNDUxMH0.J9c7QoM9kQFJxP3kSKju75M_9iobnwcDTjG6BtOJpog"
+# }
 
 ###
 POST http://localhost:3333/api/auth/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjUwODI4LCJleHAiOjE2NzIyNjE2Mjh9.xVdKoopJUdBFau6Xga4WH0_O9HmSOkZteTgnk8MQep0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E4YWE3MjcyYzQ5YjM5Y2U4NjE3ZjIiLCJlbWFpbCI6ImN1c3RvbWVyQGN1c3RvbWVyLmNvbSIsInJvbGUiOiJDdXN0b21lciIsImZpcnN0bmFtZSI6IjIyMjIyMjIyMiIsImxhc3RuYW1lIjpudWxsLCJhdXRoSWQiOiI2M2FkYzgyZWNlYjIyYzg3NjJiZjU2N2QiLCJpYXQiOjE2NzIzMzMzNTgsImV4cCI6MTY3MjM0NDE1OH0.gkzNZk_mdGWjywIIcuRmnOxOzpC09OkW6Qszvl4ED5k
 
 ###
 PUT http://localhost:3333/api/user/63a599a135dbdf0fe0dd62a9/updatepassword
@@ -49,9 +49,5 @@ Content-Type: application/json
   "firstname": "222222222",
   "specialization": ["IT"]
 }
-
-###
-GET http://localhost:3333/api/auth/63925fd3abd314dda8b00a42
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E1OTFlMDI1MTE4NDJjY2ZmMDI5YWYiLCJlbWFpbCI6InVzZXJAdXNlcnMuY29tIiwicm9sZSI6IlBlcmZvcm1lciIsImZpcnN0bmFtZSI6IkFuZHJleSIsImxhc3RuYW1lIjoiUGV0cm92IiwiaWF0IjoxNjcyMjQ3NzMyLCJleHAiOjE2NzIyNDc3OTJ9.wB9h9964IBQuf5HtC5UshIwwaQqKt68mDftypmGzzpk
 
 ###

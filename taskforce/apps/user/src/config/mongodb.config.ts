@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
+import { EnvNameEnum } from '@taskforce/shared-types';
 
-export default registerAs('mongodb', () => ({
+export const mongoDbConfig = registerAs(EnvNameEnum.MongoDB, () => ({
   databaseName: process.env.MONGO_DB,
   host: process.env.MONGO_HOST,
   port: parseInt(process.env.MONGO_PORT, 10),

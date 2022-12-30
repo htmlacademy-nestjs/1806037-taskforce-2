@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class UserDto {
   @ApiProperty()
-  @Expose({ name: '_id' })
+  @Transform(({ obj }) => obj._id.toString())
+  @Expose()
   public id: string;
 
   @ApiProperty()
@@ -13,4 +14,24 @@ export class UserDto {
   @ApiProperty()
   @Expose()
   public role: string;
+
+  @ApiProperty()
+  @Expose()
+  public firstname: string;
+
+  @ApiProperty()
+  @Expose()
+  public lastname: string;
+
+  @ApiProperty()
+  @Expose()
+  public dateBirth: Date;
+
+  @ApiProperty()
+  @Expose()
+  public city: string;
+
+  @ApiProperty()
+  @Expose()
+  public avatar?: string;
 }

@@ -12,7 +12,7 @@ export class TaskEntity {
 
   description: string;
 
-  category: TaskCategoryInterface[]; // Тут типизация для ID
+  category: TaskCategoryInterface; // Тут типизация для ID
 
   price?: number;
 
@@ -42,7 +42,7 @@ export class TaskEntity {
     this.userId = userId;
     this.title = title;
     this.description = description;
-    this.category = [category];
+    this.category = category;
     this.price = price;
     this.lifeTime= lifeTime;
     this.image = image;
@@ -55,7 +55,6 @@ export class TaskEntity {
   public toObject() {
     return {
       ...this,
-      category: this.category.map(item => ({id: item.id})),
      };
   }
 

@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { TaskInterface, TaskStatusEnum, TaskStatusType } from '@taskforce/shared-types';
-import { DEFAULT_PAGINATION_COUNT } from '../../assets/constants';
-import { checkUpdateStatusTaskFn } from '../../assets/heplers';
+import { TaskStatusType } from '@taskforce/shared-types';
+import { DEFAULT_PAGINATION_COUNT } from '../../assets/constant/constants';
+import { checkUpdateStatusTaskFn } from '../../assets/helper/heplers';
 import { TaskCategoryService } from '../task-category/task-category.service';
 import { TaskEntity } from '../task-repository/entities/task.entity';
 import { TaskCategoryRepository } from '../task-repository/task-category.repository';
 import { TaskRepository } from '../task-repository/task.repository';
 import { ReplyPerformerUserIdDto } from './dto/reply-performer-userid.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { TaskDto } from './dto/task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChoosePerformeruserIdDto } from './dto/choose-performer-userid.dto';
+import { TaskQuery } from '../../assets/query/task.query';
 
 @Injectable()
 export class TaskService {
@@ -33,12 +33,8 @@ export class TaskService {
     return await this.taskRepository.create(newTask) as unknown as TaskEntity;
   }
 
-  public async getAll(paginationCount?: number): Promise<TaskEntity[]> {
-    if (paginationCount) {
-      return await this.taskRepository.find(paginationCount) as unknown as TaskEntity[];
-    }
-
-    return await this.taskRepository.find(DEFAULT_PAGINATION_COUNT) as unknown as TaskEntity[];
+  public async get(query: TaskQuery): Promise<TaskEntity[]> {
+    return await this.taskRepository.find(query) as unknown as TaskEntity[];
   }
 
   public async getTaskById(taskId: number): Promise<TaskEntity | null> {
@@ -98,7 +94,7 @@ export class TaskService {
       throw new Error(`This user: ${userId} has already been selected as the task executor`);
     }
 
-    return await this.taskRepository.choosePerformerUserIdToTaskById(taskId, userId) as TaskEntity;
+    return await this.taskRepository.choosePerformerUserIdToTaskById(taskId, userId) as unknown as TaskEntity;
   }
 
   public async addReplyPerformerUserIdToTaskById(taskId: number, dto: ReplyPerformerUserIdDto): Promise<TaskEntity> {

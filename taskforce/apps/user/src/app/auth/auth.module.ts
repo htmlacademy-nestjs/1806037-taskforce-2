@@ -1,13 +1,24 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt/dist';
+import { PassportModule } from '@nestjs/passport';
+import { getJwtConfig } from '../../config/jwt.config';
 import { UserRepositoryModule } from '../user-repository/user-repository.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtStrategy } from './strategies/jwt.strategies';
+import { AuthTokenVerificationService } from './auth-token-verification.service';
+import { AuthRepositoryModule } from '../auth-repository/auth-repository.module';
 
 @Module({
   imports: [
     UserRepositoryModule,
+    AuthRepositoryModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: getJwtConfig,
+    }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, AuthTokenVerificationService, JwtStrategy],
 })
 export class AuthModule {}

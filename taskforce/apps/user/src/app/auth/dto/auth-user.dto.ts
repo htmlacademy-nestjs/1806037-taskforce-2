@@ -5,19 +5,24 @@ import { ApiProperty } from '@nestjs/swagger';
 export class AuthUserDto {
   @ApiProperty({
     required: true,
+    description: 'User uniq email',
+    example: 'user@user.com',
   })
-  @Expose()
-  @IsEmail()
+  @IsEmail(
+    {},
+    { message: '' },
+    )
   @IsNotEmpty()
   @IsDefined()
+  @Expose()
   public email!: string;
 
   @ApiProperty({
     required: true,
   })
-  @Expose()
   @IsString()
   @IsNotEmpty()
   @IsDefined()
+  @Expose()
   public password!: string;
 }

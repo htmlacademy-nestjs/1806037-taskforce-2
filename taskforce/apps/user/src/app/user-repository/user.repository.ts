@@ -1,4 +1,3 @@
-
 import { UserRoleEnum } from '@taskforce/shared-types';
 import { UpdateUserDtoType, UserEntityType } from '../../assets/type/types';
 import { Injectable } from '@nestjs/common';
@@ -11,14 +10,14 @@ import { CreateUserDto } from '../auth/dto/create-user.dto';
 
 @Injectable()
 export class UserRepository {
-  private readonly userMongoDbCollection: Collection;
+  private readonly mongoDbUsersCollection: Collection;
 
   constructor (
     @InjectConnection() private readonly userMongoDbConnection: Connection,
     @InjectModel(CustomerUserEntity.name) private readonly customerUserModel: Model<CustomerUserEntity>,
     @InjectModel(PerformerUserEntity.name) private readonly performerUserModel: Model<PerformerUserEntity>,
   ) {
-    this.userMongoDbCollection = this.userMongoDbConnection.collection('users');
+    this.mongoDbUsersCollection = this.userMongoDbConnection.collection('users');
   }
 
   public async create(dto: CreateUserDto): Promise<UserEntityType> {
@@ -39,19 +38,20 @@ export class UserRepository {
   }
 
   public async findById(id: string): Promise<UserEntityType> {
-    return await this.userMongoDbCollection.findOne({
+    return await this.mongoDbUsersCollection.findOne({
       _id: new ObjectId(id),
     }) as UserEntityType;
   }
 
   public async findByEmail(email: string): Promise<UserEntityType> {
-    return await this.userMongoDbCollection.findOne({
+    return await this.mongoDbUsersCollection.findOne({
       email: email,
     }) as UserEntityType;
   }
 
   public async update(id: string, dto: UpdateUserDtoType): Promise<UserEntityType> {
-    const result =  await this.userMongoDbCollection.findOneAndUpdate(
+    console.log(dto);
+    const result =  await this.mongoDbUsersCollection.findOneAndUpdate(
       {
         _id: new ObjectId(id),
       },
@@ -69,9 +69,10 @@ export class UserRepository {
   }
 
   public async updatePassword(id: string, newPasswordHash: string): Promise<UserEntityType> {
-    const result = await this.userMongoDbCollection.findOneAndUpdate({
+    const result = await this.mongoDbUsersCollection.findOneAndUpdate(
+      {
       _id: new ObjectId(id),
-    },
+      },
       {
         $set: {
           passwordHash: newPasswordHash
@@ -86,7 +87,7 @@ export class UserRepository {
   }
 
   public async delete(id: string): Promise<void> {
-    return await this.userMongoDbCollection.deleteOne({
+    return await this.mongoDbUsersCollection.deleteOne({
       _id: new ObjectId(id),
     }) as unknown as void;
   }

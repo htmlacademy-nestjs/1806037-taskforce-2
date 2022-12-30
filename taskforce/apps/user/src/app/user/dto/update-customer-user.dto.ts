@@ -1,16 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { AdultDateValidator } from "@taskforce/core";
-import { UserRoleEnum } from "@taskforce/shared-types";
 import { Expose } from "class-transformer";
-import { IsEnum, IsString, MaxLength, MinLength, Validate } from 'class-validator';
-import { UserRoleType } from "libs/shared-types/src/lib/type/user-role.type";
+import { IsString, MaxLength, MinLength, Validate } from 'class-validator';
 
 export class UpdateCustomerUserDto {
-  @ApiProperty()
-  @Expose()
-  @IsEnum(UserRoleEnum)
-  public role: UserRoleType;
-
   @ApiProperty()
   @Expose()
   @IsString()

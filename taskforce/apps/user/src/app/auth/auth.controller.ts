@@ -1,12 +1,16 @@
-import { Controller, Post, HttpCode, HttpStatus, Body, LoggerService, Logger } from '@nestjs/common';
+import { Controller, Post, HttpCode, HttpStatus, Body, LoggerService, Logger, UseGuards, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
-import { fillDTO } from '@taskforce/core';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { CustomError, fillDTO, handleError } from '@taskforce/core';
 import { AuthService } from './auth.service';
+import { JwtTokensDto } from './dto/jwt-tokens.dto';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { JwtRefreshTokenDto } from './dto/jwt-refresh-token.dto';
+import { JwtAccessTokenDto } from './dto/jwt-access-token.dto';
+import { RefreshToken } from './metadata/refresh-token.metadata';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,19 +28,12 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto) {
-    const newUser = plainToInstance(CreateUserDto, dto);
-    const errors = await validate(newUser, { skipMissingProperties: true });
-
     try {
-      if (errors.length > 0) {
-        throw new Error(errors.toString());
-      }
-
       return fillDTO(UserDto, await this.authService.register(dto));
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
+    } catch (err) {
+      const error = err as CustomError;
+      this.logger.error(error.message, error.stack);
+      handleError(error);
     }
   }
 
@@ -47,31 +44,51 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: AuthUserDto) {
-    const user = plainToInstance(AuthUserDto, dto);
-    const errors = await validate(user);
-
     try {
-      if (errors.length > 0) {
-        return errors;
-      }
-
-      return fillDTO(UserDto, await this.authService.verifyUser(user));
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
+      return fillDTO(JwtTokensDto, await this.authService.login(dto));
+    } catch (err) {
+      const error = err as CustomError;
+      this.logger.error(error.message, error.stack);
+      handleError(error);
     }
+  }
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Request for a new token based on the refresh token'
+  })
+  @RefreshToken()
+  @UseGuards(JwtAuthGuard)
+  @Post('refreshtoken')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Req() req: Request) {
+    const refreshToken = req.headers['authorization'].split(' ')[1];
+    try {
+      return fillDTO(JwtAccessTokenDto, await this.authService.refreshToken(refreshToken));
+    } catch (err) {
+      const error = err as CustomError;
+      this.logger.error(error.message, error.stack);
+      handleError(error);
+    }
   }
 
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'The user logged out'
   })
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout() {
-    return await this.authService.logout();
-  }
+  async logout(@Req() req: Request) {
+    const authId = req.user['authId'];
+    try {
+      await this.authService.logout(authId);
 
+      return 'OK';
+    } catch (err) {
+      const error = err as CustomError;
+      this.logger.error(error.message, error.stack);
+      handleError(error);
+    }
+  }
 }

@@ -10,7 +10,8 @@ import { UserDto } from './dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { JwtRefreshTokenDto } from './dto/jwt-refresh-token.dto';
 import { JwtAccessTokenDto } from './dto/jwt-access-token.dto';
-import { RefreshToken } from './metadata/refresh-token.metadata';
+import { RefreshTokenMeta } from './metadata/refresh-token.metadata';
+import { LogoutMeta } from './metadata/logout.metadata';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -57,7 +58,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Request for a new token based on the refresh token'
   })
-  @RefreshToken()
+  @RefreshTokenMeta()
   @UseGuards(JwtAuthGuard)
   @Post('refreshtoken')
   @HttpCode(HttpStatus.OK)
@@ -76,6 +77,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'The user logged out'
   })
+  @LogoutMeta()
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)

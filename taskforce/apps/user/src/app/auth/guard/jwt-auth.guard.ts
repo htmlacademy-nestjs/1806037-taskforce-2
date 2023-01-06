@@ -6,6 +6,7 @@ import { JwtService } from "@nestjs/jwt";
 import { AuthGuard } from "@nestjs/passport";
 import { CustomError } from "@taskforce/core";
 import { ExceptionEnum } from "@taskforce/shared-types";
+import { MetadataEnum } from "apps/user/src/assets/enum/metadata.enum";
 import { JwtPayloadDto } from "../dto/jwt-payload.dto";
 
 @Injectable()
@@ -20,13 +21,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (this.reflector.get('refreshToken', context.getHandler())) {
+    if (this.reflector.get(MetadataEnum.RefreshToken, context.getHandler())) {
       await super.canActivate(context);
 
       return true;
     }
 
-    if (context.getHandler().name === 'logout') {
+    if (this.reflector.get(MetadataEnum.Logout, context.getHandler())) {
       const accessToken = context.switchToHttp().getRequest().headers['authorization'].split(' ')[1];
 
       const jwtPayload: JwtPayloadDto = await this.jwtService.verifyAsync(accessToken, {

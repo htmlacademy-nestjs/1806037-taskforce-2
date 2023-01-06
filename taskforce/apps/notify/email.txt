@@ -1,0 +1,7 @@
+From: Vasya Svetov <v@vsvetov.me>
+To: Zhora <zhora@zhora.com>
+Subject: Hello world
+Date: Fr, 6 Jan 2023 17:50:00
+Content-Type: plain/text; charset=utf8
+
+Hello world! Hello, Zhora!

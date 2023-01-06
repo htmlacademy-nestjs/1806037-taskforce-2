@@ -8,7 +8,6 @@ import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { JwtRefreshTokenDto } from './dto/jwt-refresh-token.dto';
 import { JwtAccessTokenDto } from './dto/jwt-access-token.dto';
 import { RefreshTokenMeta } from './metadata/refresh-token.metadata';
 import { LogoutMeta } from './metadata/logout.metadata';

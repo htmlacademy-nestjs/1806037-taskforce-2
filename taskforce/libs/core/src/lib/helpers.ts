@@ -2,6 +2,7 @@ import { ClassConstructor, plainToInstance } from "class-transformer";
 import { ConflictException, BadRequestException, UnauthorizedException, NotFoundException, ForbiddenException, NotImplementedException } from '@nestjs/common';
 import { ExceptionEnum } from '@taskforce/shared-types';
 import { CustomError } from '@taskforce/core';
+import { ValidationError } from "class-validator";
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
@@ -17,6 +18,8 @@ export function getMongoConnectionString({username, password, host, port, databa
 
 export function handleError(error: CustomError) {
   const { message, errorType } = error;
+
+  console.log(error instanceof ValidationError);
 
   switch (errorType) {
     case ExceptionEnum.BadRequest: throw new BadRequestException(message);

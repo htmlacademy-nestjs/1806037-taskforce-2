@@ -1,6 +1,6 @@
-import { plainToInstance } from 'class-transformer';
-import { IsNumber, IsString, Max, Min, validateSync } from 'class-validator';
-import { EnvValidationMessage } from '../../../../../libs/shared-types/src/lib/enum/env-validation-message.enum';
+import { EnvValidationMessage } from "@taskforce/shared-types";
+import { plainToInstance } from "class-transformer";
+import { IsNumber, IsString, Max, Min, validateSync } from "class-validator";
 
 const MIN_PORT = 0;
 const MAX_PORT = 65535;
@@ -37,18 +37,13 @@ class EnvironmentsConfig {
     message: EnvValidationMessage.MongoDBBaseAuthRequired,
   })
   public MONGO_AUTH_BASE: string;
-
-  @IsString({
-    message: 'Invalid JWT secret string.'
-  })
-  public JWT_SECRET: string;
 }
 
-export function validateEnvironments(config: Record<string, unknown>) {
+export function validateDiscussionEnvironments(config: Record<string, unknown>) {
   const environmentsConfig = plainToInstance(
     EnvironmentsConfig,
     config,
-    { enableImplicitConversion: true  },
+    { enableImplicitConversion: true },
   );
 
   const errors = validateSync(

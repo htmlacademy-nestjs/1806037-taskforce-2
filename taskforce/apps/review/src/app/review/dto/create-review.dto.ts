@@ -18,17 +18,6 @@ export class CreateReviewDto {
   @IsDefined()
   public review: string;
 
-
-  @ApiProperty({
-    required: true,
-    description: 'Task ID for current review',
-  })
-  @Expose()
-  @IsString()
-  @IsDefined()
-  public taskId: string;
-
-
   @ApiProperty({
     required: true,
     description: 'Creator ID review',
@@ -38,6 +27,14 @@ export class CreateReviewDto {
   @IsDefined()
   public userId: string;
 
+  @ApiProperty({
+    required: true,
+    description: 'Task ID for current review',
+  })
+  @Expose()
+  @IsString()
+  @IsDefined()
+  public taskId: string;
 
   @ApiProperty({
     required: true,

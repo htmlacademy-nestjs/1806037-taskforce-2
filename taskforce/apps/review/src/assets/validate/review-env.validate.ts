@@ -37,14 +37,9 @@ class EnvironmentsConfig {
     message: EnvValidationMessage.MongoDBBaseAuthRequired,
   })
   public MONGO_AUTH_BASE: string;
-
-  @IsString({
-    message: 'Invalid JWT secret string.'
-  })
-  public JWT_SECRET: string;
 }
 
-export function validateEnvironments(config: Record<string, unknown>) {
+export function reviewValidateEnvironments(config: Record<string, unknown>) {
   const environmentsConfig = plainToInstance(
     EnvironmentsConfig,
     config,

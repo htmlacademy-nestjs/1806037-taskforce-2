@@ -1,47 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { DEFAULT_PAGINATION_COUNT } from '../../assets/constants';
-import { DiscussionMemoryRepository } from '../discussion-memory/discussion-memory.repository';
-import { CommentEntity } from '../discussion-memory/entities/comment.entity';
-import { CommentDto } from './dto/comment.dto';
+import { DiscussionRepository } from '../discussion-repository/discussion.repository';
+import { CommentEntity } from '../discussion-repository/entity/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentQuery } from './query/comment.query';
 
 @Injectable()
 export class CommentService {
   constructor (
-    private readonly discussRepository: DiscussionMemoryRepository,
+    private readonly discussRepository: DiscussionRepository,
   ) { }
 
   public async create(dto: CreateCommentDto): Promise<CommentEntity> {
-    const comment = new CommentEntity(dto);
+    const comment = new CommentEntity().fillEntity(dto);
 
     return await this.discussRepository.create(comment);
   }
 
-  public async getComments(paginationCount?: number) {
-    if (paginationCount) {
-      return await this.discussRepository.find(paginationCount);
-    }
-
-    return await this.discussRepository.find(DEFAULT_PAGINATION_COUNT);
+  public async getComments(query: CommentQuery): Promise<CommentEntity[]> {
+    return await this.discussRepository.find(query);
   }
 
   public async getComment(commentId: string): Promise<CommentEntity | null> {
-    const existComment = await this.discussRepository.findById(commentId);
-
-    if (!existComment) {
-      return null;
-    }
-
-    return existComment;
+    return await this.discussRepository.findById(commentId);
   }
 
-  public async delete(commentId: string): Promise<void | null> {
-    const existComment = await this.discussRepository.findById(commentId);
-
-    if (!existComment) {
-      return null;
-    }
-
+  public async delete(commentId: string): Promise<CommentEntity> {
     return await this.discussRepository.delete(commentId);
   }
 

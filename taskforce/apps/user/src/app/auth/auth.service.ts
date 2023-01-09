@@ -74,13 +74,6 @@ export class AuthService {
       lastname: existUser.lastname,
     };
 
-    // const refreshToken = await this.jwtService.signAsync(payload, {
-    //   algorithm: 'HS256',
-    //   expiresIn: '3h',
-    // }).catch((err) => {
-    //     throw new CustomError(err, ExceptionEnum.Conflict);
-    // });
-
     // TODO
     // Добавляем данного пользователя в БД для авторизованных
     const authDataUser = {

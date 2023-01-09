@@ -2,9 +2,9 @@ POST http://localhost:3333/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "customer@customer.com",
+  "email": "custom@customer.com",
   "password": "11111111",
-  "role": "Customer",
+  "role": "Performer",
   "firstname": "Andrey",
   "lastname": "Petrov",
   "dateBirth": "2000-01-01",
@@ -16,7 +16,7 @@ POST http://localhost:3333/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "customer@customer.com",
+  "email": "sASSDFAS",
   "password": "11111111"
 }
 
@@ -49,5 +49,9 @@ Content-Type: application/json
   "firstname": "222222222",
   "specialization": ["IT"]
 }
+
+###
+GET http://localhost:3000/api/user/63923e4bde079da10ffc0c90
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2E4YWE3MjcyYzQ5YjM5Y2U4NjE3ZjIiLCJlbWFpbCI6ImN1c3RvbWVyQGN1c3RvbWVyLmNvbSIsInJvbGUiOiJDdXN0b21lciIsImZpcnN0bmFtZSI6IjIyMjIyMjIyMiIsImxhc3RuYW1lIjpudWxsLCJhdXRoSWQiOiI2M2JjNTZkMmNiMjU0MjE1NTMxM2JhODMiLCJpYXQiOjE2NzMyODczNzgsImV4cCI6MTY3MzI4NzQzOH0.pg1Q9Ukf8zc-6o1hGPCMaITyx9B5-guJwSHy28OpadI
 
 ###

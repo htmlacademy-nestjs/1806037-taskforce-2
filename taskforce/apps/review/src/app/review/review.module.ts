@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ReviewMemoryModule } from '../review-memory/review-memory.module';
+import { ReviewRepositoryModule } from '../review-repository/review-repository.module';
 import { ReviewController } from './review.controller';
 import { ReviewService } from './review.service';
 
 @Module({
-  imports: [ReviewMemoryModule],
+  imports: [ReviewRepositoryModule],
   controllers: [ReviewController],
   providers: [ReviewService],
 })

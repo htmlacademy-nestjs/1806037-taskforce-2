@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Post, Put, Query, UseFilters } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { fillDTO } from '@taskforce/core';
-import { ValidationError } from 'class-validator';
+import { AllExceptionsFilter, fillDTO } from '@taskforce/core';
 import { ReplyPerformerUserIdDto } from './dto/reply-performer-userid.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
@@ -14,6 +13,7 @@ import { TaskQuery } from '../../assets/query/task.query';
 
 @ApiTags('task')
 @Controller('task')
+@UseFilters(AllExceptionsFilter)
 export class TaskController {
   private readonly logger: LoggerService = new Logger(TaskController.name);
 
@@ -28,21 +28,7 @@ export class TaskController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   public async createTask(@Body() dto: CreateTaskDto): Promise<TaskDto | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.create(dto));
-    } catch (err) {
-      if (err.errorType === 'ValidationError') {
-        const error = err.value as ValidationError;
-        this.logger.error(error.toString());
-
-        return error.toString();
-      }
-
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.create(dto));
   }
 
   @ApiResponse({
@@ -52,16 +38,7 @@ export class TaskController {
   @Get()
   @HttpCode(HttpStatus.OK)
   public async getTasks(@Query() query: TaskQuery): Promise<TaskDto | TaskDto[] | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.get(query));
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
-
-
+    return fillDTO(TaskDto, await this.taskService.get(query));
   }
 
   @ApiResponse({
@@ -71,14 +48,7 @@ export class TaskController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   public async getTask(@Param('id', ParseIntPipe) taskId: number): Promise<TaskDto | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.getTaskById(taskId));
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.getTaskById(taskId));
   }
 
   @ApiResponse({
@@ -88,21 +58,7 @@ export class TaskController {
   @Put(':id')
   @HttpCode(HttpStatus.CREATED)
   public async updateTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: UpdateTaskDto): Promise<TaskDto | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.updateTaskById(taskId, dto));
-    } catch (err) {
-      if (err.errorType === 'ValidationError') {
-        const error = err.value as ValidationError;
-        this.logger.error(error.toString());
-
-        return error.toString();
-      }
-
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.updateTaskById(taskId, dto));
   }
 
   @ApiResponse({
@@ -112,21 +68,7 @@ export class TaskController {
   @Put(':id/updatestatus')
   @HttpCode(HttpStatus.CREATED)
   public async updateStatusTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: StatusTaskDto): Promise<TaskDto | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.updateStatusTask(taskId, dto.statusTask));
-    } catch (err) {
-      if (err.errorType === 'ValidationError') {
-        const error = err.value as ValidationError;
-        this.logger.error(error.toString());
-
-        return error.toString();
-      }
-
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.updateStatusTask(taskId, dto.statusTask));
   }
 
   @ApiResponse({
@@ -136,23 +78,10 @@ export class TaskController {
   @Put(':id/chooseperformer')
   @HttpCode(HttpStatus.OK)
   async choosePerformerById(@Param('id', ParseIntPipe) taskId: number, @Body() dto: ChoosePerformeruserIdDto) {
+    // TODO
     // ЗДЕСЬ НАДО ЛОГИКУ ПО ИЗМЕНЕНИЮ СТАТУСОВ ЗАДАЧИ ПРИ ДОБАВЛЕНИИ ИЛИ УДАЛЕНИИ ИСПОЛНИТЕЛЯ
 
-    try {
-      return fillDTO(TaskDto, await this.taskService.choosePerformerUserIdToTaskById(taskId, dto));
-    } catch (err) {
-      if (err.errorType === 'ValidationError') {
-        const error = err.value as ValidationError;
-        this.logger.error(error.toString());
-
-        return error.toString();
-      }
-
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.choosePerformerUserIdToTaskById(taskId, dto));
   }
 
   @ApiResponse({
@@ -162,21 +91,7 @@ export class TaskController {
   @Put(':id/addreply')
   @HttpCode(HttpStatus.CREATED)
   public async addReplyToTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: ReplyPerformerUserIdDto): Promise<TaskDto | string> {
-    try {
-      return fillDTO(TaskDto, await this.taskService.addReplyPerformerUserIdToTaskById(taskId, dto));
-    } catch (err) {
-      if (err.errorType === 'ValidationError') {
-        const error = err.value as ValidationError;
-        this.logger.error(error.toString());
-
-        return error.toString();
-      }
-
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return fillDTO(TaskDto, await this.taskService.addReplyPerformerUserIdToTaskById(taskId, dto));
   }
 
   @ApiResponse({
@@ -186,15 +101,8 @@ export class TaskController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   public async deleteTask(@Param('id', ParseIntPipe) taskId: number): Promise<string> {
-    try {
-      await this.taskService.deleteTaskById(taskId);
+    await this.taskService.deleteTaskById(taskId);
 
-      return `Delete task with id: ${taskId} is succussful`;
-    } catch (err) {
-      const error = err as Error;
-      this.logger.error(error.message, error.stack);
-
-      return error.message;
-    }
+    return `Delete task with id: ${taskId} is succussful`;
   }
 }

@@ -1,14 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, UseFilters } from '@nestjs/common';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
-import { fillDTO } from '@taskforce/core';
-import { plainToInstance } from 'class-transformer';
-import { validate, ValidationError } from 'class-validator';
+import { AllExceptionsFilter, CustomError, fillDTO, handleError } from '@taskforce/core';
+import { ExceptionEnum } from '@taskforce/shared-types';
 import { CommentService } from './comment.service';
 import { CommentDto } from './dto/comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentQuery } from './query/comment.query';
 
-@ApiTags('comment')
-@Controller('comment')
+@ApiTags('comments')
+@Controller('comments')
+@UseFilters(AllExceptionsFilter)
 export class CommentController {
   constructor (
     private readonly commentService: CommentService,
@@ -18,16 +19,9 @@ export class CommentController {
     status: HttpStatus.CREATED,
     description: 'Creating a comment',
   })
-  @Post()
+  @Post('/')
   @HttpCode(HttpStatus.CREATED)
-  public async create(@Body() dto: CreateCommentDto): Promise<CommentDto | ValidationError[]> {
-    const newComment = plainToInstance(CreateCommentDto, dto);
-    const errors = await validate(newComment);
-
-    if (errors.length > 0) {
-      return errors;
-    }
-
+  public async create(@Body() dto: CreateCommentDto): Promise<CommentDto> {
     return fillDTO(CommentDto, await this.commentService.create(dto));
   }
 
@@ -35,16 +29,10 @@ export class CommentController {
     status: HttpStatus.OK,
     description: 'Get comments',
   })
-  @Get()
+  @Get('/')
   @HttpCode(HttpStatus.OK)
-  public async getComments(@Query('page') page: string): Promise<CommentDto | CommentDto[]> {
-    const paginationCount = Number(Number(page).toFixed(0));
-
-    if (!isNaN(paginationCount) && paginationCount > 1) {
-      return fillDTO(CommentDto, await this.commentService.getComments(paginationCount));
-    }
-
-    return fillDTO(CommentDto, await this.commentService.getComments());
+  public async getComments(@Query() query: CommentQuery): Promise<CommentDto | CommentDto[]> {
+    return fillDTO(CommentDto, await this.commentService.getComments(query));
   }
 
   @ApiResponse({
@@ -54,13 +42,14 @@ export class CommentController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   public async getComment(@Param('id') commentId: string): Promise<CommentDto | string> {
-    const result = await this.commentService.getComment(commentId);
-
-    if (result === null) {
-      return `Comment with id: ${commentId} is not found`;
-    }
-
-    return fillDTO(CommentDto, result);
+    return fillDTO(CommentDto,
+      await this.commentService.getComment(commentId)
+                .then((result) => {
+                  if (!result) throw new CustomError(`Comment with this id: ${commentId} is not found.`, ExceptionEnum.NotFound);
+                  return result;
+                })
+                .catch((error) => handleError(error))
+    );
   }
 
   @ApiResponse({
@@ -70,11 +59,9 @@ export class CommentController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   public async deleteComment(@Param('id') commentId: string): Promise<string> {
-    const result = await this.commentService.delete(commentId);
-
-    if (result === null) {
-      return `Comment with id: ${commentId} is not found`;
-    }
+    await this.commentService.delete(commentId)
+      .then((result) => { if (!result) throw new CustomError(`Comment with this id: ${commentId} is not found.`, ExceptionEnum.NotFound) })
+      .catch((error) => handleError(error));
 
     return 'OK';
   }

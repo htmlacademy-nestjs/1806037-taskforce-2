@@ -3,7 +3,7 @@ import { MongooseModuleAsyncOptions } from "@nestjs/mongoose";
 import { getMongoConnectionString } from "@taskforce/core";
 import { ConnectionDatabaseNameEnum } from "@taskforce/shared-types";
 
-export function getMongoDbConfig(): MongooseModuleAsyncOptions {
+export function getUsersMongoDbConfig(): MongooseModuleAsyncOptions {
   return {
     // connectionName: 'users',
     inject: [ConfigService],

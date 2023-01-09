@@ -4,6 +4,7 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common/pipes';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -13,6 +14,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+      excludeExtraneousValues: true,
+    },
+  }));
 
   const config = new DocumentBuilder()
                    .setTitle('The «Review» service')

@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CurrentDateValidator } from '@taskforce/core';
-import { TaskCategoryInterface } from '@taskforce/shared-types';
 import { Expose } from 'class-transformer';
 import { IsArray, IsDefined, IsInt, IsNotEmpty, IsString, MaxLength, Min, MinLength, Validate } from 'class-validator';
 

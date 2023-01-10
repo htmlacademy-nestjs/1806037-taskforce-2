@@ -1,0 +1,1 @@
+export const SUBSCRIBERS_LIMIT_COUNT = 10;

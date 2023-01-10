@@ -21,8 +21,21 @@ export class NotifyRepository {
     return await this.emailSubscriberModel.findByIdAndDelete(id);
   }
 
-  public async find(): Promise<EmailSubscriberEntity[]> {
-    return await this.emailSubscriberModel.find();
+  public async find(limit?: number, skip?: number): Promise<EmailSubscriberEntity[]> {
+    // if (limit) {
+    //   return await this.emailSubscriberModel.aggregate([
+    //     {
+    //       $match: {},
+    //     },
+
+    //   ]);
+    // }
+
+    return await this.emailSubscriberModel.find().limit(limit).skip(skip);
+  }
+
+  public async count(): Promise<number> {
+    return await this.emailSubscriberModel.count();
   }
 
   public async findById(id: string): Promise<EmailSubscriberEntity> {

@@ -1,10 +1,12 @@
 import { Injectable, Logger, LoggerService } from '@nestjs/common';
 import { CustomError } from '@taskforce/core';
 import { ExceptionEnum } from '@taskforce/shared-types';
+import { SUBSCRIBERS_LIMIT_COUNT } from '../../assets/constant/constants';
 import { MailService } from '../mailer/mail.service';
 import { EmailSubscriberEntity } from '../notify-repository/entity/email-subscriber.entity';
 import { NotifyRepository } from '../notify-repository/notify.repository';
 import { CreateEmailSubscriberDto } from './dto/create-email-subscriber.dto';
+import { NewTaskNotifyDto } from './dto/new-task-notify.dto';
 
 @Injectable()
 export class EmailSubscriberService {
@@ -19,20 +21,26 @@ export class EmailSubscriberService {
     const { email } = dto;
     const existSubscriber = await this.notifyRepository.findByEmail(email);
 
-    if (existSubscriber) { throw new CustomError('The subscriber with same email already exists', ExceptionEnum.Conflict) }
+    if (existSubscriber) {
+      throw new CustomError('The subscriber with same email already exists', ExceptionEnum.Conflict);
+    }
 
     return await this.notifyRepository.create(new EmailSubscriberEntity().fillEntity(dto));
   }
 
-  public async notifyAboutTask(dto: any) {
-    const subscribersList = await this.notifyRepository.find();
+  public async notifyAboutTask(dto: NewTaskNotifyDto) {
+    const subscribersCount = await this.notifyRepository.count();
 
-    for (const item of subscribersList) {
-      const { email } = item;
-      const { title } = dto;
-      const text = `There is a new task "${title}" for performers`;
+    for (let limit = SUBSCRIBERS_LIMIT_COUNT; limit < subscribersCount + SUBSCRIBERS_LIMIT_COUNT; limit += SUBSCRIBERS_LIMIT_COUNT) {
+      const subscribersList = await this.notifyRepository.find(limit, limit - SUBSCRIBERS_LIMIT_COUNT);
 
-      await this.mailService.sendMessage(email, null, text);
+      for (const item of subscribersList) {
+        const { email } = item;
+        const { title } = dto;
+        const text = `There is a new task "${title}" for performers`;
+
+        await this.mailService.sendMessage(email, null, text);
+      }
     }
   }
 }

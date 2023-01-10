@@ -9,7 +9,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app/app.module';
-import { getRabbitMqConfig } from './config/get-rabbitmq.config';
+import { getRabbitMqConfigForEmailSubscriber } from './config/get-rabbitmq-for-email-subscriber.config';
 import { NotifyEnvInterface } from './config/notify-env.interface';
 
 async function bootstrap() {
@@ -30,10 +30,13 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
+    transformOptions: {
+      excludeExtraneousValues: true,
+    },
   }));
 
   const configService = app.get<ConfigService<NotifyEnvInterface>>(ConfigService);
-  app.connectMicroservice(getRabbitMqConfig(configService));
+  app.connectMicroservice(getRabbitMqConfigForEmailSubscriber(configService));
 
   await app.startAllMicroservices();
   await app.listen(port);

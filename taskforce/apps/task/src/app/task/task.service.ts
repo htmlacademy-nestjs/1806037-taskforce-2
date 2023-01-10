@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { ExceptionEnum, TaskStatusType } from '@taskforce/shared-types';
+import { Inject, Injectable } from '@nestjs/common';
+import { CommandEventEnum, ExceptionEnum, TaskStatusType } from '@taskforce/shared-types';
 import { DEFAULT_PAGINATION_COUNT } from '../../assets/constant/constants';
 import { checkUpdateStatusTaskFn } from '../../assets/helper/heplers';
 import { TaskCategoryService } from '../task-category/task-category.service';
@@ -11,7 +11,8 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChoosePerformeruserIdDto } from './dto/choose-performer-userid.dto';
 import { TaskQuery } from '../../assets/query/task.query';
-import { CustomError } from '@taskforce/core';
+import { createEventForRabbitMq, CustomError } from '@taskforce/core';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class TaskService {
@@ -19,6 +20,7 @@ export class TaskService {
     private readonly taskRepository: TaskRepository,
     private readonly taskCategoryService: TaskCategoryService,
     private readonly taskCategoryRepository: TaskCategoryRepository,
+    @Inject('RABBITMQ_CLIENT') private readonly rabbitMqClient: ClientProxy,
   ) { }
 
   public async create(dto: CreateTaskDto): Promise<TaskEntity> {
@@ -31,7 +33,17 @@ export class TaskService {
 
     const newTask = new TaskEntity(dto, existCategory);
 
-    return await this.taskRepository.create(newTask) as unknown as TaskEntity;
+    const createdTask = await this.taskRepository.create(newTask) as unknown as TaskEntity;
+
+    this.rabbitMqClient.emit(
+      createEventForRabbitMq(CommandEventEnum.AddTask),
+      {
+        userId: createdTask.userId,
+        title: createdTask.title,
+      },
+    );
+
+    return createdTask;
   }
 
   public async get(query: TaskQuery): Promise<TaskEntity[]> {

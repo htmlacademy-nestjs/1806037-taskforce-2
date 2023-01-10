@@ -1,6 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Inject, Logger, LoggerService } from "@nestjs/common";
 import { HttpAdapterHost } from '@nestjs/core';
-import { ValidationError } from "class-validator";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Post, Put, Query, UseFilters } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AllExceptionsFilter, fillDTO } from '@taskforce/core';
+import { AllExceptionsFilter, fillDTO, handleError } from '@taskforce/core';
 import { ReplyPerformerUserIdDto } from './dto/reply-performer-userid.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { StatusTaskDto } from './dto/status-task.dto';
@@ -28,7 +28,11 @@ export class TaskController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   public async createTask(@Body() dto: CreateTaskDto): Promise<TaskDto | string> {
-    return fillDTO(TaskDto, await this.taskService.create(dto));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.create(dto)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -38,7 +42,11 @@ export class TaskController {
   @Get()
   @HttpCode(HttpStatus.OK)
   public async getTasks(@Query() query: TaskQuery): Promise<TaskDto | TaskDto[] | string> {
-    return fillDTO(TaskDto, await this.taskService.get(query));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.get(query)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -48,7 +56,11 @@ export class TaskController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   public async getTask(@Param('id', ParseIntPipe) taskId: number): Promise<TaskDto | string> {
-    return fillDTO(TaskDto, await this.taskService.getTaskById(taskId));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.getTaskById(taskId)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -58,7 +70,11 @@ export class TaskController {
   @Put(':id')
   @HttpCode(HttpStatus.CREATED)
   public async updateTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: UpdateTaskDto): Promise<TaskDto | string> {
-    return fillDTO(TaskDto, await this.taskService.updateTaskById(taskId, dto));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.updateTaskById(taskId, dto)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -68,7 +84,11 @@ export class TaskController {
   @Put(':id/updatestatus')
   @HttpCode(HttpStatus.CREATED)
   public async updateStatusTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: StatusTaskDto): Promise<TaskDto | string> {
-    return fillDTO(TaskDto, await this.taskService.updateStatusTask(taskId, dto.statusTask));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.updateStatusTask(taskId, dto.statusTask)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -81,7 +101,11 @@ export class TaskController {
     // TODO
     // ЗДЕСЬ НАДО ЛОГИКУ ПО ИЗМЕНЕНИЮ СТАТУСОВ ЗАДАЧИ ПРИ ДОБАВЛЕНИИ ИЛИ УДАЛЕНИИ ИСПОЛНИТЕЛЯ
 
-    return fillDTO(TaskDto, await this.taskService.choosePerformerUserIdToTaskById(taskId, dto));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.choosePerformerUserIdToTaskById(taskId, dto)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -91,7 +115,11 @@ export class TaskController {
   @Put(':id/addreply')
   @HttpCode(HttpStatus.CREATED)
   public async addReplyToTask(@Param('id', ParseIntPipe) taskId: number, @Body() dto: ReplyPerformerUserIdDto): Promise<TaskDto | string> {
-    return fillDTO(TaskDto, await this.taskService.addReplyPerformerUserIdToTaskById(taskId, dto));
+    return fillDTO(
+      TaskDto,
+      await this.taskService.addReplyPerformerUserIdToTaskById(taskId, dto)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -101,7 +129,8 @@ export class TaskController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   public async deleteTask(@Param('id', ParseIntPipe) taskId: number): Promise<string> {
-    await this.taskService.deleteTaskById(taskId);
+    await this.taskService.deleteTaskById(taskId)
+            .catch(err => handleError(err));
 
     return `Delete task with id: ${taskId} is succussful`;
   }

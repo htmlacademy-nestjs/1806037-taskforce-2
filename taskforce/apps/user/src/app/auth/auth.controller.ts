@@ -29,10 +29,12 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto) {
-    return fillDTO(UserDto,
-      await this.authService.register(dto)
-              .catch(err => handleError(err))
-    );
+    // return fillDTO(UserDto,
+    //   await this.authService.register(dto)
+    //           .catch(err => handleError(err))
+    // );
+    await this.authService.register(dto)
+              .catch(err => handleError(err));
   }
 
   @ApiResponse({

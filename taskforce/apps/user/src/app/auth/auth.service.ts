@@ -1,15 +1,15 @@
-import { Injectable, Logger, LoggerService } from '@nestjs/common';
-import { comparePassword, CustomError } from '@taskforce/core';
+import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { comparePassword, createEventForRabbitMq, CustomError } from '@taskforce/core';
 import { UserEntityType } from '../../assets/type/types';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from '../user-repository/user.repository';
 import { JwtService } from '@nestjs/jwt/dist';
-import { JwtRefreshTokenDto } from './dto/jwt-refresh-token.dto';
-import { ExceptionEnum } from '@taskforce/shared-types';
+import { CommandEventEnum, ExceptionEnum, UserRoleEnum } from '@taskforce/shared-types';
 import { AuthRepository } from '../auth-repository/auth.repository';
 import { AuthUserEntity } from '../auth-repository/entity/auth-user.entity';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -19,16 +19,30 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
+    @Inject('RABBITMQ_CLIENT') private readonly rabbitMqClient: ClientProxy,
   ) { }
 
-  public async register(dto: CreateUserDto): Promise<UserEntityType | Error> {
+  public async register(dto: CreateUserDto): Promise<UserEntityType> {
     const existUser = await this.userRepository.findByEmail(dto.email);
 
     if (existUser) {
       throw new CustomError('User already exists', ExceptionEnum.Conflict);
     }
 
-    return await this.userRepository.create(dto);
+    const createdUser = await this.userRepository.create(dto);
+
+    if (createdUser.role !== UserRoleEnum.Performer) return createdUser;
+
+    this.rabbitMqClient.emit(
+      createEventForRabbitMq(CommandEventEnum.AddSubscriber),
+      {
+        email: createdUser.email,
+        firstname: createdUser.firstname,
+        role: createdUser.role,
+      },
+    );
+
+    return createdUser;
   }
 
   public async verifyUser(email: string): Promise<UserEntityType> {

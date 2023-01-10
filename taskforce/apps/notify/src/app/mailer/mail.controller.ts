@@ -1,10 +1,14 @@
-import { Controller, HttpCode, HttpStatus, Logger, LoggerService, Post, Body } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Logger, LoggerService, Post, Body, UseFilters } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 import { MailService } from './mail.service';
-import { CustomError, handleError } from '@taskforce/core';
+import { AllExceptionsFilter, handleError } from '@taskforce/core';
 import { SendMessageDto } from '../../assets/dto/send-message.dto';
+import { EventPattern } from '@nestjs/microservices';
+import { CommandEventEnum } from '@taskforce/shared-types';
+import { CreateEmailSubscriberDto } from '../email-subscriber/dto/create-email-subscriber.dto';
 
 @Controller('mail')
+@UseFilters(AllExceptionsFilter)
 export class MailController {
   private readonly logger: LoggerService = new Logger(MailController.name);
 
@@ -20,12 +24,8 @@ export class MailController {
   @HttpCode(HttpStatus.OK)
   async sendMessage(@Body() dto: SendMessageDto) {
     const { recipient , sender, text } = dto;
-    try {
-      return await this.mailService.sendMessage(recipient, sender, text);
-    } catch (err) {
-      const error = err as CustomError;
-      this.logger.error(error.message, error.stack);
-      handleError(error);
-    }
+
+    return await this.mailService.sendMessage(recipient, sender, text)
+                  .catch(err => handleError(err));
   }
 }

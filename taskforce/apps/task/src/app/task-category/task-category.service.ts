@@ -1,5 +1,6 @@
 import { Injectable, Logger, LoggerService } from '@nestjs/common';
-import { TaskCategoryInterface } from '@taskforce/shared-types';
+import { CustomError } from '@taskforce/core';
+import { ExceptionEnum, TaskCategoryInterface } from '@taskforce/shared-types';
 import { TaskCategoryEntity } from '../task-repository/entities/task-category.entity';
 import { TaskCategoryRepository } from '../task-repository/task-category.repository';
 import { CreateTaskCategoryDto } from './dto/create-task-category.dto';
@@ -23,7 +24,7 @@ export class TaskCategoryService {
     const result = await this.taskCategoryRepository.findById(categoryId);
 
     if (!result) {
-      throw new Error(`Category with this id: ${categoryId} is not found`);
+      throw new CustomError(`Category with this id: ${categoryId} is not found`, ExceptionEnum.NotFound);
     }
 
     return result;
@@ -38,7 +39,7 @@ export class TaskCategoryService {
     const existCategory = await this.taskCategoryRepository.findByName(title);
 
     if (existCategory) {
-      throw new Error(`Category with this title: "${title}" is already exist`);
+      throw new CustomError(`Category with this title: "${title}" is already exist`, ExceptionEnum.BadRequest);
     }
 
     const newCategory = new TaskCategoryEntity(dto);
@@ -60,7 +61,7 @@ export class TaskCategoryService {
     const existCategory = await this.taskCategoryRepository.findByName(title);
 
     if (existCategory) {
-      throw new Error(`Category with this title: "${title}" is already exist`);
+      throw new CustomError(`Category with this title: "${title}" is already exist`, ExceptionEnum.BadRequest);
     }
 
     const updateCategory = new TaskCategoryEntity(dto);

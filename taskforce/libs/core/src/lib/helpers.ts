@@ -3,6 +3,7 @@ import { ConflictException, BadRequestException, UnauthorizedException, NotFound
 import { ExceptionEnum } from '@taskforce/shared-types';
 import { CustomError } from '@taskforce/core';
 import { ValidationError } from "class-validator";
+import { CommandEventEnum } from '@taskforce/shared-types';
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
@@ -19,8 +20,6 @@ export function getMongoConnectionString({username, password, host, port, databa
 export function handleError(error: CustomError) {
   const { message, errorType } = error;
 
-  console.log(error instanceof ValidationError);
-
   switch (errorType) {
     case ExceptionEnum.BadRequest: throw new BadRequestException(message);
     case ExceptionEnum.Unauthorized: throw new UnauthorizedException(message);
@@ -31,3 +30,7 @@ export function handleError(error: CustomError) {
     default: throw new Error(message);
   }
 }
+
+export const createEventForRabbitMq = (command: keyof typeof CommandEventEnum) => {
+  return { cmd: command };
+};

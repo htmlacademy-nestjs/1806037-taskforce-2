@@ -1,4 +1,4 @@
-export interface MongoDbConfigInterface {
+export interface MongoDbEnvInterface {
   MONGO_DB: string;
   MONGO_HOST: string;
   MONGO_PORT: number;

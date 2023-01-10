@@ -1,13 +1,13 @@
 import { MongooseModuleAsyncOptions } from "@nestjs/mongoose";
 import { ConfigService } from '@nestjs/config';
 import { getMongoConnectionString } from "@taskforce/core";
-import { MongoDbConfigInterface } from "../../../../libs/shared-types/src/lib/interface/mongodb-config.interface";
+import { NotifyEnvInterface } from "./notify-env.interface";
 
-export function getDiscussionMongoDbConfig(): MongooseModuleAsyncOptions {
+export function getNotifyMongoDbConfig(): MongooseModuleAsyncOptions {
   return {
-    // connectionName: 'dicsussion',
+    // connectionName: 'notify',
     inject: [ConfigService],
-    useFactory: async (configService: ConfigService<MongoDbConfigInterface>) => {
+    useFactory: async (configService: ConfigService<NotifyEnvInterface>) => {
       return {
       uri: getMongoConnectionString({
         username: configService.get<string>("MONGO_USER"),

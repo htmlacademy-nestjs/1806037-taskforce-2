@@ -75,15 +75,14 @@ export class UserController {
       updateUserData = fillDTO(UpdatePerformerUserDto, dto);
     }
 
-    const errors = await validate(updateUserData, { skipMissingProperties: true })
-                          .catch(err => handleError(err)) as ValidationError[];
+    await validate(updateUserData, { skipMissingProperties: true })
+      .then(errors => {
+        if (errors.length > 0)
+          throw errors;
+      })
+      .catch(err => handleError(err)) as unknown as ValidationError[];
 
-    try {
-      if (errors.length > 0) {
-        throw new Error(errors.toString());
-      }
-
-      const existUser = await this.userService.updateUserById(id, updateUserData)
+    const existUser = await this.userService.updateUserById(id, updateUserData)
                                 .catch(err => handleError(err)) as UserEntityType;
 
       if (existUser.role === UserRoleEnum.Customer) {
@@ -92,11 +91,6 @@ export class UserController {
       if (existUser.role === UserRoleEnum.Performer) {
         return fillDTO(PerformerUserDto, existUser);
       }
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
-    }
   }
 
   @ApiResponse({
@@ -107,14 +101,9 @@ export class UserController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async deleteuserById(@Param('id', MongoIdValidationPipe) id: string) {
-    try {
-      await this.userService.deleteUserById(id);
+    await this.userService.deleteUserById(id)
+            .catch(err => handleError(err));
 
-      return 'Delete is complete.'
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
-    }
+    return 'Delete is complete.'
   }
 }

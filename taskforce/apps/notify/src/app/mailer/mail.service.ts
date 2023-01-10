@@ -1,5 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { NotifyRepository } from '../notify-repository/notify.repository';
 
 @Injectable()
 export class MailService {
@@ -7,6 +8,7 @@ export class MailService {
 
   constructor (
     private readonly mailerService: MailerService,
+    private readonly notifyRepository: NotifyRepository,
   ) { }
 
   public async sendMessage(to: string, from?: string, text?: string) {

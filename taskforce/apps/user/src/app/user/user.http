@@ -2,7 +2,7 @@ POST http://localhost:3333/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "custom@customer.com",
+  "email": "customfmm@customer.com",
   "password": "11111111",
   "role": "Performer",
   "firstname": "Andrey",

@@ -11,4 +11,10 @@ export interface NotifyEnvInterface {
   RABBIT_HOST: string;
   RABBIT_PORT: number;
   RABBIT_NOTIFY_SERVICE_QUEUE: string;
+
+  MAIL_SMTP_HOST: string;
+  MAIL_SMTP_PORT: number;
+  MAIL_USERNAME: string;
+  MAIL_PASSWORD: string;
+  MAIL_FROM: string;
 }

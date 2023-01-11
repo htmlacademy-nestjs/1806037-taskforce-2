@@ -37,6 +37,34 @@ class EnvironmentsConfig {
     message: EnvValidationMessage.MongoDBBaseAuthRequired,
   })
   public MONGO_AUTH_BASE: string;
+
+
+  @IsString({
+    message: 'Mail SMTP host is required',
+  })
+  MAIL_SMTP_HOST: string;
+
+  @IsNumber({}, {
+    message: 'Mail SMTP port is required',
+  })
+  @Min(MIN_PORT)
+  @Max(MAX_PORT)
+  MAIL_SMTP_PORT: number;
+
+  @IsString({
+    message: 'Mail SMTP username is required',
+  })
+  MAIL_USERNAME: string;
+
+  @IsString({
+    message: 'Mail SMTP password is required',
+  })
+  MAIL_PASSWORD: string;
+
+  @IsString({
+    message: 'Mail SMTP from is required',
+  })
+  MAIL_FROM: string;
 }
 
 export function validateNotifyEnvironments(config: Record<string, unknown>) {

@@ -25,7 +25,9 @@ export class EmailSubscriberService {
       throw new CustomError('The subscriber with same email already exists', ExceptionEnum.Conflict);
     }
 
-    return await this.notifyRepository.create(new EmailSubscriberEntity().fillEntity(dto));
+    const createdSubscriber = await this.notifyRepository.create(new EmailSubscriberEntity().fillEntity(dto));
+
+    return await this.mailService.sendNotifyNewSubscriber(createdSubscriber);
   }
 
   public async notifyAboutTask(dto: NewTaskNotifyDto) {
@@ -35,11 +37,13 @@ export class EmailSubscriberService {
       const subscribersList = await this.notifyRepository.find(limit, limit - SUBSCRIBERS_LIMIT_COUNT);
 
       for (const item of subscribersList) {
-        const { email } = item;
-        const { title } = dto;
-        const text = `There is a new task "${title}" for performers`;
+        const body = {
+          email: item.email,
+          username: item.firstname,
+          taskTitle: dto.title,
+        };
 
-        await this.mailService.sendMessage(email, null, text);
+        await this.mailService.sendNotifyNewTask(body);
       }
     }
   }

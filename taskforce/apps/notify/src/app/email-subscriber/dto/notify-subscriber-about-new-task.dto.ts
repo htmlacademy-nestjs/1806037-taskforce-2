@@ -1,16 +1,16 @@
 import { Expose } from "class-transformer";
 import { IsEmail, IsString } from "class-validator";
 
-export class SendMessageDto {
+export class NotifySubscriberAboutNewTaskDto {
   @Expose()
   @IsEmail()
-  public recipient: string;
-
-  @Expose()
-  @IsEmail()
-  public sender: string;
+  public email: string;
 
   @Expose()
   @IsString()
-  public text: string;
+  public username: string;
+
+  @Expose()
+  @IsString()
+  public taskTitle: string;
 }

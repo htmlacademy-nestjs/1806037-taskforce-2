@@ -1,5 +1,8 @@
-import { MailerService } from '@nestjs-modules/mailer';
+import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger, LoggerService } from '@nestjs/common';
+import { NOTIFY_SUBJECT_TEXT } from '../../assets/constant/constants';
+import { CreateEmailSubscriberDto } from '../email-subscriber/dto/create-email-subscriber.dto';
+import { NotifySubscriberAboutNewTaskDto } from '../email-subscriber/dto/notify-subscriber-about-new-task.dto';
 import { NotifyRepository } from '../notify-repository/notify.repository';
 
 @Injectable()
@@ -11,15 +14,34 @@ export class MailService {
     private readonly notifyRepository: NotifyRepository,
   ) { }
 
-  public async sendMessage(to: string, from?: string, text?: string) {
-    const options = {
-      to: to, // list of receivers
-      subject: 'Testing Nest MailerModule ✔', // Subject line
-      text: text ?? 'Hello world', // plaintext body
-      html: '<b>welcome</b>', // HTML body content
+  public async sendNotifyNewSubscriber(dto: CreateEmailSubscriberDto) {
+    const { email, firstname } = dto;
+
+    const options: ISendMailOptions = {
+      to: email,
+      subject: NOTIFY_SUBJECT_TEXT,
+      template: './add-subscriber',
+      context: {
+        firstname,
+        email
+      },
     };
 
-    if (from) options['from'] = from;
+    return await this.mailerService.sendMail(options);
+  }
+
+  public async sendNotifyNewTask(dto: NotifySubscriberAboutNewTaskDto) {
+    const { email, username, taskTitle } = dto;
+
+    const options: ISendMailOptions = {
+      to: email,
+      subject: NOTIFY_SUBJECT_TEXT,
+      template: './add-task',
+      context: {
+        firstname: username,
+        taskTitle,
+      },
+    };
 
     return await this.mailerService.sendMail(options);
   }

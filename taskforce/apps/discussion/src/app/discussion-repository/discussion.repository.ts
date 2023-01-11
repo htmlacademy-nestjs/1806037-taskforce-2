@@ -25,17 +25,7 @@ export class DiscussionRepository {
   public async find(query: CommentQuery): Promise<CommentEntity[]> {
     const { limit, page } = query;
 
-    return await this.commentModel.aggregate([
-      {
-        $match: {},
-      },
-      {
-        $skip: limit * (page - 1),
-      },
-      {
-        $limit: limit,
-      },
-    ]);
+    return await this.commentModel.find().limit(limit).skip(limit * (page - 1));
   }
 
   public async findById(id: string): Promise<CommentEntity> {

@@ -1,13 +1,13 @@
 import { MongooseModuleAsyncOptions } from "@nestjs/mongoose"
 import { ConfigService } from '@nestjs/config';
 import { getMongoConnectionString } from "@taskforce/core";
-import { MongoDbConfigInterface } from "@taskforce/shared-types";
+import { MongoDbEnvInterface } from "@taskforce/shared-types";
 
 export const getReviewMongoDbConfig = (): MongooseModuleAsyncOptions => {
   return {
     // connectionName: 'review',
     inject: [ConfigService],
-    useFactory: async (configService: ConfigService<MongoDbConfigInterface>) => ({
+    useFactory: async (configService: ConfigService<MongoDbEnvInterface>) => ({
       uri: getMongoConnectionString({
         username: configService.get<string>("MONGO_USER"),
         password: configService.get<string>("MONGO_PASSWORD"),

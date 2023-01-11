@@ -22,15 +22,6 @@ export class NotifyRepository {
   }
 
   public async find(limit?: number, skip?: number): Promise<EmailSubscriberEntity[]> {
-    // if (limit) {
-    //   return await this.emailSubscriberModel.aggregate([
-    //     {
-    //       $match: {},
-    //     },
-
-    //   ]);
-    // }
-
     return await this.emailSubscriberModel.find().limit(limit).skip(skip);
   }
 

@@ -70,6 +70,9 @@ export class PerformerUserEntity implements UserInterface {
   @Prop()
   public tasks: object[];
 
+  @Prop()
+  public failedTasks: string[];
+
   public fillEntity(customerUser: CreateUserDto): this {
     this.email = customerUser.email;
     this.role = customerUser.role;

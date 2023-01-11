@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DiscussionMemoryModule } from '../discussion-memory/discussion-memory.module';
+import { DiscussionRepositoryModule } from '../discussion-repository/discussion-repository.module';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
 
 @Module({
-  imports: [DiscussionMemoryModule],
+  imports: [DiscussionRepositoryModule],
   controllers: [CommentController],
   providers: [CommentService],
 })

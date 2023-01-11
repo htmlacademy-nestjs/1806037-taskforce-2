@@ -1,7 +1,7 @@
-import { Controller, Post, HttpCode, HttpStatus, Body, LoggerService, Logger, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, HttpCode, HttpStatus, Body, LoggerService, Logger, UseGuards, Req, UseFilters } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
-import { CustomError, fillDTO, handleError } from '@taskforce/core';
+import { AllExceptionsFilter, fillDTO, handleError } from '@taskforce/core';
 import { AuthService } from './auth.service';
 import { JwtTokensDto } from './dto/jwt-tokens.dto';
 import { AuthUserDto } from './dto/auth-user.dto';
@@ -14,6 +14,7 @@ import { LogoutMeta } from './metadata/logout.metadata';
 
 @ApiTags('auth')
 @Controller('auth')
+@UseFilters(AllExceptionsFilter)
 export class AuthController {
   private readonly logger: LoggerService = new Logger(AuthController.name);
 
@@ -28,13 +29,12 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto) {
-    try {
-      return fillDTO(UserDto, await this.authService.register(dto));
-    } catch (err) {
-      const error = err as CustomError;
-      this.logger.error(error.message, error.stack);
-      handleError(error);
-    }
+    // return fillDTO(UserDto,
+    //   await this.authService.register(dto)
+    //           .catch(err => handleError(err))
+    // );
+    await this.authService.register(dto)
+              .catch(err => handleError(err));
   }
 
   @ApiResponse({
@@ -44,13 +44,10 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: AuthUserDto) {
-    try {
-      return fillDTO(JwtTokensDto, await this.authService.login(dto));
-    } catch (err) {
-      const error = err as CustomError;
-      this.logger.error(error.message, error.stack);
-      handleError(error);
-    }
+    return fillDTO(JwtTokensDto,
+      await this.authService.login(dto)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -63,13 +60,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Req() req: Request) {
     const refreshToken = req.headers['authorization'].split(' ')[1];
-    try {
-      return fillDTO(JwtAccessTokenDto, await this.authService.refreshToken(refreshToken));
-    } catch (err) {
-      const error = err as CustomError;
-      this.logger.error(error.message, error.stack);
-      handleError(error);
-    }
+
+    return fillDTO(JwtAccessTokenDto,
+      await this.authService.refreshToken(refreshToken)
+              .catch(err => handleError(err))
+    );
   }
 
   @ApiResponse({
@@ -82,14 +77,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request) {
     const authId = req.user['authId'];
-    try {
-      await this.authService.logout(authId);
+    await this.authService.logout(authId)
+            .catch(err => handleError(err));
 
-      return 'OK';
-    } catch (err) {
-      const error = err as CustomError;
-      this.logger.error(error.message, error.stack);
-      handleError(error);
-    }
+    return 'OK';
   }
 }

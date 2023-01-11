@@ -13,7 +13,8 @@
         "outputPath": "dist/apps/discussion",
         "main": "apps/discussion/src/main.ts",
         "tsConfig": "apps/discussion/tsconfig.app.json",
-        "assets": ["apps/discussion/src/assets"]
+        "assets": ["apps/discussion/src/assets"],
+        "generatedPackageJson": true
       },
       "configurations": {
         "production": {

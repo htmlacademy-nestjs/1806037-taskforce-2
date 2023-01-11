@@ -2,6 +2,8 @@ import { ClassConstructor, plainToInstance } from "class-transformer";
 import { ConflictException, BadRequestException, UnauthorizedException, NotFoundException, ForbiddenException, NotImplementedException } from '@nestjs/common';
 import { ExceptionEnum } from '@taskforce/shared-types';
 import { CustomError } from '@taskforce/core';
+import { ValidationError } from "class-validator";
+import { CommandEventEnum } from '@taskforce/shared-types';
 
 export const fillDTO = <T, V>(someDto: ClassConstructor<T>, plainObject: V) => {
   return plainToInstance(someDto, plainObject, { excludeExtraneousValues: true });
@@ -28,3 +30,7 @@ export function handleError(error: CustomError) {
     default: throw new Error(message);
   }
 }
+
+export const createEventForRabbitMq = (command: keyof typeof CommandEventEnum) => {
+  return { cmd: command };
+};

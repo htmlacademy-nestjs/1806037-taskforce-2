@@ -1,7 +1,8 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class ReviewDto {
-  @Expose({name: '_id'})
+  @Transform(({ obj }) => obj._id.toString())
+  @Expose()
   public id: string;
 
   @Expose()

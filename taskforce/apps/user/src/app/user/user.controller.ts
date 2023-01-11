@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Put, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, LoggerService, Param, Put, UseFilters, UseGuards, UsePipes } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { fillDTO } from '@taskforce/core';
+import { AllExceptionsFilter, fillDTO, handleError } from '@taskforce/core';
 import { MongoIdValidationPipe, UserRoleEnum } from '@taskforce/shared-types';
-import { validate } from 'class-validator';
-import { UpdateUserDtoType } from '../../assets/type/types';
+import { validate, ValidationError } from 'class-validator';
+import { UpdateUserDtoType, UserEntityType } from '../../assets/type/types';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CustomerUserDto } from './dto/customer-user.dto';
 import { PerformerUserDto } from './dto/performer-user.dro';
@@ -13,8 +13,9 @@ import { UpdatePerformerUserDto } from './dto/update-performer-user.dto';
 import { UserService } from './user.service';
 
 
-@ApiTags('user')
-@Controller('user')
+@ApiTags('users')
+@Controller('users')
+@UseFilters(AllExceptionsFilter)
 export class UserController {
   private readonly logger: LoggerService = new Logger(UserController.name);
 
@@ -30,19 +31,14 @@ export class UserController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getUserById(@Param('id', MongoIdValidationPipe) id: string) {
-    try {
-      const existUser = await this.userService.findUserById(id);
+    const existUser = await this.userService.findUserById(id)
+                        .catch(err => handleError(err)) as UserEntityType;
 
-      if (existUser.role === UserRoleEnum.Customer) {
-        return fillDTO(CustomerUserDto, existUser);
-      }
-      if (existUser.role === UserRoleEnum.Performer) {
-        return fillDTO(PerformerUserDto, existUser);
-      }
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
+    if (existUser.role === UserRoleEnum.Customer) {
+      return fillDTO(CustomerUserDto, existUser);
+    }
+    if (existUser.role === UserRoleEnum.Performer) {
+      return fillDTO(PerformerUserDto, existUser);
     }
   }
 
@@ -54,13 +50,8 @@ export class UserController {
   @Put(':id/updatepassword')
   @HttpCode(HttpStatus.CREATED)
   async updatePasswordUserById(@Param('id', MongoIdValidationPipe) id: string, @Body() dto: UpdatePasswordUserDto) {
-    try {
-      return await this.userService.updatePassword(id, dto);
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
-    }
+    return await this.userService.updatePassword(id, dto)
+                  .catch(err => handleError(err));
   }
 
   @ApiResponse({
@@ -72,7 +63,8 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes()
   async updateUserById(@Param('id', MongoIdValidationPipe) id: string, @Body() dto: UpdateUserDtoType) {
-    const { role } = await this.getUserById(id) as CustomerUserDto | PerformerUserDto;
+    const { role } = await this.getUserById(id)
+                      .catch(err => handleError(err)) as CustomerUserDto | PerformerUserDto;
 
     let updateUserData: UpdateUserDtoType;
     if (role === UserRoleEnum.Customer) {
@@ -83,14 +75,15 @@ export class UserController {
       updateUserData = fillDTO(UpdatePerformerUserDto, dto);
     }
 
-    const errors = await validate(updateUserData, { skipMissingProperties: true });
+    await validate(updateUserData, { skipMissingProperties: true })
+      .then(errors => {
+        if (errors.length > 0)
+          throw errors;
+      })
+      .catch(err => handleError(err)) as unknown as ValidationError[];
 
-    try {
-      if (errors.length > 0) {
-        throw new Error(errors.toString());
-      }
-
-      const existUser = await this.userService.updateUserById(id, updateUserData);
+    const existUser = await this.userService.updateUserById(id, updateUserData)
+                                .catch(err => handleError(err)) as UserEntityType;
 
       if (existUser.role === UserRoleEnum.Customer) {
         return fillDTO(CustomerUserDto, existUser);
@@ -98,11 +91,6 @@ export class UserController {
       if (existUser.role === UserRoleEnum.Performer) {
         return fillDTO(PerformerUserDto, existUser);
       }
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
-    }
   }
 
   @ApiResponse({
@@ -113,14 +101,9 @@ export class UserController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   async deleteuserById(@Param('id', MongoIdValidationPipe) id: string) {
-    try {
-      await this.userService.deleteUserById(id);
+    await this.userService.deleteUserById(id)
+            .catch(err => handleError(err));
 
-      return 'Delete is complete.'
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(err.message, err.stack);
-      return err.message;
-    }
+    return 'Delete is complete.'
   }
 }

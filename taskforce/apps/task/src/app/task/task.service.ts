@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { TaskStatusType } from '@taskforce/shared-types';
+import { Inject, Injectable } from '@nestjs/common';
+import { CommandEventEnum, ExceptionEnum, TaskStatusType } from '@taskforce/shared-types';
 import { DEFAULT_PAGINATION_COUNT } from '../../assets/constant/constants';
 import { checkUpdateStatusTaskFn } from '../../assets/helper/heplers';
 import { TaskCategoryService } from '../task-category/task-category.service';
@@ -11,6 +11,8 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ChoosePerformeruserIdDto } from './dto/choose-performer-userid.dto';
 import { TaskQuery } from '../../assets/query/task.query';
+import { createEventForRabbitMq, CustomError } from '@taskforce/core';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class TaskService {
@@ -18,6 +20,7 @@ export class TaskService {
     private readonly taskRepository: TaskRepository,
     private readonly taskCategoryService: TaskCategoryService,
     private readonly taskCategoryRepository: TaskCategoryRepository,
+    @Inject('RABBITMQ_CLIENT') private readonly rabbitMqClient: ClientProxy,
   ) { }
 
   public async create(dto: CreateTaskDto): Promise<TaskEntity> {
@@ -30,7 +33,17 @@ export class TaskService {
 
     const newTask = new TaskEntity(dto, existCategory);
 
-    return await this.taskRepository.create(newTask) as unknown as TaskEntity;
+    const createdTask = await this.taskRepository.create(newTask) as unknown as TaskEntity;
+
+    this.rabbitMqClient.emit(
+      createEventForRabbitMq(CommandEventEnum.AddTask),
+      {
+        userId: createdTask.userId,
+        title: createdTask.title,
+      },
+    );
+
+    return createdTask;
   }
 
   public async get(query: TaskQuery): Promise<TaskEntity[]> {
@@ -41,7 +54,7 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} was not found`);
+      throw new CustomError(`Task with this id: ${taskId} was not found`, ExceptionEnum.NotFound);
     }
 
     return existTask as unknown as TaskEntity;
@@ -51,7 +64,7 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} is not found`);
+      throw new CustomError(`Task with this id: ${taskId} is not found`, ExceptionEnum.NotFound);
     }
 
     let existCategory = await this.taskCategoryService.getByName(dto.category);
@@ -68,14 +81,14 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} is not found`);
+      throw new CustomError(`Task with this id: ${taskId} is not found`, ExceptionEnum.NotFound);
     }
 
     const currentStatus = existTask.status;
     const checkResult =  checkUpdateStatusTaskFn(currentStatus, status);
 
     if (typeof checkResult !== 'boolean') {
-      throw new Error(checkResult);
+      throw new CustomError(checkResult, ExceptionEnum.BadRequest);
     }
 
     return await this.taskRepository.updateStatus(taskId, status) as unknown as TaskEntity;
@@ -85,13 +98,13 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} is not found`);
+      throw new CustomError(`Task with this id: ${taskId} is not found`, ExceptionEnum.NotFound);
     }
 
     const { userId } = dto;
 
     if (userId === existTask.currentPerformer) {
-      throw new Error(`This user: ${userId} has already been selected as the task executor`);
+      throw new CustomError(`This user: ${userId} has already been selected as the task executor`, ExceptionEnum.Forbidden);
     }
 
     return await this.taskRepository.choosePerformerUserIdToTaskById(taskId, userId) as unknown as TaskEntity;
@@ -101,7 +114,7 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} is not found`);
+      throw new CustomError(`Task with this id: ${taskId} is not found`, ExceptionEnum.NotFound);
     }
 
     const { userId } = dto;
@@ -109,7 +122,7 @@ export class TaskService {
     const isTargetReply = existTask.repliedPerformers.find(item => item === userId)
 
     if (isTargetReply) {
-      throw new Error(`This user: ${userId} has already responded to this task`);
+      throw new CustomError(`This user: ${userId} has already responded to this task`, ExceptionEnum.Forbidden);
     }
 
     return await this.taskRepository.addReplyPerformerToTaskById(taskId, userId) as TaskEntity;
@@ -119,7 +132,7 @@ export class TaskService {
     const existTask = await this.taskRepository.findById(taskId);
 
     if (!existTask) {
-      throw new Error(`Task with this id: ${taskId} is not found`);
+      throw new CustomError(`Task with this id: ${taskId} is not found`, ExceptionEnum.NotFound);
     }
 
     return await this.taskRepository.delete(taskId);

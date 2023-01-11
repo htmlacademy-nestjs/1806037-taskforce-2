@@ -11,7 +11,7 @@ export const getJwtConfig = async(config: ConfigType<typeof jwtConfig> = jwtConf
     secret: config.jwtSecret,
     signOptions: {
       algorithm: "HS256",
-      expiresIn: '60s',
+      expiresIn: '10m',
     },
   };
 }

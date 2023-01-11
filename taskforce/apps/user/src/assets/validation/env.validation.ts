@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { IsNumber, IsString, Max, Min, validateSync } from 'class-validator';
-import { EnvValidationMessage } from '../enum/env-validation-message.enum';
+import { EnvValidationMessage } from '../../../../../libs/shared-types/src/lib/enum/env-validation-message.enum';
 
 const MIN_PORT = 0;
 const MAX_PORT = 65535;
@@ -42,9 +42,36 @@ class EnvironmentsConfig {
     message: 'Invalid JWT secret string.'
   })
   public JWT_SECRET: string;
+
+  @IsString({
+    message: 'Rabbit user is required.'
+  })
+  public RABBIT_USER: string;
+
+  @IsString({
+    message: 'Rabbit password is required.'
+  })
+  public RABBIT_PASSWORD: string;
+
+  @IsString({
+    message: 'Rabbit host is required.'
+  })
+  public RABBIT_HOST: string;
+
+  @IsNumber({}, {
+    message: 'Rabbit port is required',
+  })
+  @Min(MIN_PORT)
+  @Max(MAX_PORT)
+  public RABBIT_PORT: number;
+
+  @IsString({
+    message: 'Rabbit queue is required.'
+  })
+  public RABBIT_USERS_SERVICE_QUEUE: string;
 }
 
-export function validateEnvironments(config: Record<string, unknown>) {
+export function validateUserModuleEnvironments(config: Record<string, unknown>) {
   const environmentsConfig = plainToInstance(
     EnvironmentsConfig,
     config,
